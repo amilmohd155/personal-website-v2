@@ -11,6 +11,8 @@ export function getReadTime(filepath: string, wordsPerMinute = 200) {
   return `${Math.ceil(wordsCount / wordsPerMinute)} min`;
 }
 
+type ContentType = "blog" | "devlog" | "stories" | "project";
+
 interface ContentMetadata {
   author: string;
   date: string;
@@ -18,7 +20,19 @@ interface ContentMetadata {
   title: string;
 }
 
-export interface ArticleMetadata extends ContentMetadata {
+interface DevlogMetadata {
+  index: number;
+}
+
+interface ProjectMetadata {
+  demo: string;
+  repository: string;
+}
+
+export interface ArticleMetadata
+  extends ContentMetadata,
+    Partial<DevlogMetadata>,
+    Partial<ProjectMetadata> {
   tags: string[];
   category: string;
   id: string;
@@ -29,16 +43,55 @@ export interface ArticleMetadata extends ContentMetadata {
   filePath: string;
   createdAt: string;
   updatedAt: string;
+  published: boolean;
   content?: {
     mdx: string;
     html: string;
   };
 }
 
-export const retrieveArticleData = async () => {
+const getPath = (contentType: ContentType, collection?: string) => {
+  switch (contentType) {
+    case "blog":
+      return {
+        path: config.blogDirectory,
+        relativePath: "blog",
+      };
+
+    case "devlog":
+      if (!collection) {
+        throw new Error("Collection name is required for devlog articles");
+      }
+      return {
+        path: `${config.devlogDirectory}/${collection}`,
+        relativePath: `devlog/${collection}`,
+      };
+    case "stories":
+      return {
+        path: config.storyDirectory,
+        relativePath: "stories",
+      };
+    case "project":
+      return {
+        path: config.projectDirectory,
+        relativePath: "projects",
+      };
+  }
+};
+
+export const retrieveArticleData = async (
+  contentType: ContentType,
+  collection?: string,
+) => {
+  if (contentType === "devlog" && !collection) {
+    throw new Error("Collection name is required for devlog articles");
+  }
+
   const metadata = [];
 
-  const directory = join(process.cwd(), config.blogDirectory);
+  const { path, relativePath } = getPath(contentType, collection);
+
+  const directory = join(process.cwd(), path);
 
   const files = await readdir(directory, {
     withFileTypes: true,
@@ -51,7 +104,9 @@ export const retrieveArticleData = async () => {
   for await (const file of mdxFiles) {
     const filePath = join(directory, file.name);
 
-    metadata.push(await extractArticleMetadata(filePath, file.name, directory));
+    metadata.push(
+      await extractArticleMetadata(filePath, file.name, relativePath),
+    );
   }
 
   return metadata;
@@ -60,46 +115,83 @@ export const retrieveArticleData = async () => {
 async function extractArticleMetadata(
   filePath: string,
   fileName: string,
-  fileDirectory: string,
+  relativePath: string,
 ): Promise<ArticleMetadata> {
   const slug = slugify(fileName.replace(/\.mdx$/, ""));
 
-  const content = await import(`@/content/blog/${fileName}`);
+  const content = await import(`@/content/${relativePath}/${fileName}`);
   const stats = await stat(filePath);
 
   return {
     id: randomUUID(),
     slug,
-    href: `blog/${slug}`,
+    index: content.metadata.index,
+    href: `${relativePath}/${slug}`,
     author: config.author,
-    category: content.metadata.category,
-    // date: content.metadata.date,
+    category: content.metadata.category || "Uncategorized",
+    tags: content.metadata.tags || [],
+    date: content.metadata.date,
     title: content.metadata.title,
     summary: content.metadata.summary,
+    published: content.metadata.published ?? true,
     fileName,
     filePath,
     createdAt: new Date(stats.ctime).toISOString(),
     updatedAt: new Date(stats.mtime).toISOString(),
     readTime: getReadTime(filePath),
+    demo: content.metadata.demo,
+    repository: content.metadata.repository,
   };
 }
 
-export const getArticles = memoize(async () => retrieveArticleData());
-
-export const getLatestArticles = memoize(async () =>
-  (await getArticles())
-    .sort(
-      (a, b) =>
-        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
-    )
-    .slice(0, 3),
+export const getArticles = memoize(
+  async (contentType: ContentType = "blog", collection?: string) =>
+    retrieveArticleData(contentType, collection),
 );
 
-export const getArticleBySlug = memoize(async (slug: string) => {
-  const article = (await getArticles()).find((entry) => entry.slug === slug);
-  if (!article) {
-    throw new Error(`Article with slug ${slug} not found`);
-  }
+export const getLatestArticles = memoize(
+  async (contentType: ContentType, collection?: string) =>
+    (await getArticles(contentType, collection))
+      .sort(
+        (a, b) =>
+          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+      )
+      .slice(0, 3),
+);
 
-  return article;
-});
+export const getArticleBySlug = memoize(
+  async (
+    slug: string,
+    contentType: ContentType = "blog",
+    collection?: string,
+  ) => {
+    const article = (await getArticles(contentType, collection)).find(
+      (entry) => entry.slug === slug,
+    );
+    if (!article) {
+      throw new Error(`Article with slug ${slug} not found`);
+    }
+
+    return article;
+  },
+);
+
+export const getFilteredSortedArticles = memoize(
+  async (
+    filter: string,
+    contentType: ContentType = "blog",
+    collection?: string,
+  ) => {
+    const articles = await getArticles(contentType, collection);
+
+    const sortedArticles = articles.sort(
+      (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
+    );
+
+    const filteredArticles = sortedArticles.filter((article) => {
+      return filter === "All" ? true : article.category === filter;
+    });
+
+    return filteredArticles;
+  },
+);
