@@ -28,38 +28,38 @@ const nextConfig: NextConfig = {
   },
   pageExtensions: ["js", "jsx", "md", "mdx", "ts", "tsx"],
   reactStrictMode: true,
-  webpack: (config, { dev }) => {
-    // minify class names (does not apply to tailwindcss) (e.g. .my-class--active -> .xSrdL)
-    config.module.rules.forEach((rule: any) => {
-      if (!rule.oneOf) return;
-      rule.oneOf.forEach((oneOf: any) => {
-        if (
-          oneOf.test &&
-          oneOf.test.toString().includes("\\.module\\.(css|scss|sass)$") &&
-          oneOf.use
-        ) {
-          oneOf.use.forEach((loader: any) => {
-            if (
-              loader.loader &&
-              loader.loader.includes("css-loader") &&
-              !loader.loader.includes("postcss-loader")
-            ) {
-              loader.options = {
-                ...loader.options,
-                modules: {
-                  ...loader.options.modules,
-                  localIdentName: dev
-                    ? "[name]__[local]__[hash:base64:5]"
-                    : "[hash:base64:8]",
-                },
-              };
-            }
-          });
-        }
-      });
-    });
-    return config;
-  },
+  // webpack: (config, { dev }) => {
+  //   // minify class names (does not apply to tailwindcss) (e.g. .my-class--active -> .xSrdL)
+  //   config.module.rules.forEach((rule: any) => {
+  //     if (!rule.oneOf) return;
+  //     rule.oneOf.forEach((oneOf: any) => {
+  //       if (
+  //         oneOf.test &&
+  //         oneOf.test.toString().includes("\\.module\\.(css|scss|sass)$") &&
+  //         oneOf.use
+  //       ) {
+  //         oneOf.use.forEach((loader: any) => {
+  //           if (
+  //             loader.loader &&
+  //             loader.loader.includes("css-loader") &&
+  //             !loader.loader.includes("postcss-loader")
+  //           ) {
+  //             loader.options = {
+  //               ...loader.options,
+  //               modules: {
+  //                 ...loader.options.modules,
+  //                 localIdentName: dev
+  //                   ? "[name]__[local]__[hash:base64:5]"
+  //                   : "[hash:base64:8]",
+  //               },
+  //             };
+  //           }
+  //         });
+  //       }
+  //     });
+  //   });
+  //   return config;
+  // },
 };
 
 const withMdx = createMDX({
