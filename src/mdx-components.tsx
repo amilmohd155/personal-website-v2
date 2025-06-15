@@ -3,50 +3,52 @@ import { ComponentPropsWithoutRef } from "react";
 
 import { CodeBlock } from "./components/code-block";
 import { LinkHandler } from "./components/link-handler";
+import Image, { ImageProps } from "next/image";
+import { cn } from "./lib/utils";
 
 export function useMDXComponents(): MDXComponents {
   return {
     h1: (props: ComponentPropsWithoutRef<"h1">) => (
       <h1
-        className="not-prose text-3xl md:text-5xl font-bold tracking-tight leading-tight mb-6 text-[var(--tw-prose-headings)]"
+        className="not-prose mb-6 text-3xl leading-tight font-bold tracking-tight text-[var(--tw-prose-headings)] md:text-5xl"
         {...props}
       />
     ),
     h2: (props: ComponentPropsWithoutRef<"h2">) => (
       <h2
-        className="not-prose text-2xl font-bold mt-12 mb-4 not-prose text-[var(--tw-prose-headings)]"
+        className="not-prose not-prose mt-12 mb-4 text-2xl font-bold text-[var(--tw-prose-headings)]"
         {...props}
       />
     ),
     h3: (props: ComponentPropsWithoutRef<"h3">) => (
       <h3
-        className="not-prose font-semibold mt-8 mb-3 text-[var(--tw-prose-headings)]"
+        className="not-prose mt-8 mb-3 font-semibold text-[var(--tw-prose-headings)]"
         {...props}
       />
     ),
     h4: (props: ComponentPropsWithoutRef<"h4">) => (
       <h4
-        className="not-prose font-semibold mt-6 mb-3 text-[var(--tw-prose-headings)]"
+        className="not-prose mt-6 mb-3 font-semibold text-[var(--tw-prose-headings)]"
         {...props}
       />
     ),
     h5: (props: ComponentPropsWithoutRef<"h5">) => (
       <div
-        className="not-prose text-xs uppercase tracking-widest text-muted-foreground my-1"
+        className="not-prose text-muted-foreground my-1 text-xs tracking-widest uppercase"
         {...props}
       />
     ),
     h6: (props: ComponentPropsWithoutRef<"h6">) => (
-      <p className="not-prose text-sm text-muted-foreground my-1" {...props} />
+      <p className="not-prose text-muted-foreground my-1 text-sm" {...props} />
     ),
     p: (props: ComponentPropsWithoutRef<"p">) => (
-      <p className="leading-relaxed mb-8 prose-p:text-foreground" {...props} />
+      <p className="prose-p:text-foreground mb-8 leading-relaxed" {...props} />
     ),
     ol: (props: ComponentPropsWithoutRef<"ol">) => (
-      <ol className="list-decimal pl-5 space-y-2" {...props} />
+      <ol className="list-decimal space-y-2 pl-5" {...props} />
     ),
     ul: (props: ComponentPropsWithoutRef<"ul">) => (
-      <ul className="list-disc pl-5 space-y-1" {...props} />
+      <ul className="list-disc space-y-1 pl-5" {...props} />
     ),
     li: (props: ComponentPropsWithoutRef<"li">) => (
       <li className="pl-1" {...props} />
@@ -61,6 +63,16 @@ export function useMDXComponents(): MDXComponents {
       <LinkHandler underline {...props} />
     ),
     code: CodeBlock,
+    pre: ({ className, ...props }: ComponentPropsWithoutRef<"pre">) => (
+      <pre
+        className={cn(
+          "relative overflow-x-hidden rounded-lg border p-0",
+          className,
+        )}
+        {...props}
+      />
+    ),
+
     Table: ({ data }: { data: { headers: string[]; rows: string[][] } }) => (
       <table>
         <thead>
@@ -83,8 +95,18 @@ export function useMDXComponents(): MDXComponents {
     ),
     blockquote: (props: ComponentPropsWithoutRef<"blockquote">) => (
       <blockquote
-        className="ml-[0.075em] border-l-3 border-gray-300 pl-4 text-gray-600 dark:border-zinc-600 dark:text-zinc-300 tracking-wide"
+        className="ml-[0.075em] border-l-3 border-gray-300 pl-4 tracking-wide text-gray-600 dark:border-zinc-600 dark:text-zinc-300"
         {...props}
+      />
+    ),
+    img: (props: ComponentPropsWithoutRef<"img">) => (
+      <Image
+        {...(props as ImageProps)}
+        alt={props.alt || "Image"}
+        sizes="100vw"
+        width={500}
+        height={500}
+        style={{ width: "100%", height: "auto" }}
       />
     ),
   };

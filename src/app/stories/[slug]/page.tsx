@@ -13,11 +13,10 @@ type Props = {
 
 async function getContent(slug: string) {
   try {
-    const { fileName, ...rest } = await getArticleBySlug(slug);
+    const { fileName, ...rest } = await getArticleBySlug(slug, "stories");
 
     return {
-      mdx: lazy(() => import(`@/content/blog/${fileName}`)),
-      toc: lazy(() => import("@/components/table-of-contents")),
+      mdx: lazy(() => import(`@/content/stories/${fileName}`)),
       metadata: rest,
     };
   } catch (error) {
@@ -28,7 +27,7 @@ async function getContent(slug: string) {
 
 export async function generateStaticParams() {
   let paths: Array<{ slug: string }> = [];
-  const files = (await getArticles()).map((article) => ({
+  const files = (await getArticles("stories")).map((article) => ({
     slug: article.slug,
   }));
 
@@ -44,7 +43,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     title,
     createdAt,
     tags,
-  } = await getArticleBySlug(slug);
+  } = await getArticleBySlug(slug, "stories");
 
   return {
     title,
@@ -58,7 +57,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       description,
       publishedTime: new Date(createdAt).toISOString(),
       type: "article",
-      url: config.baseUrl + "blog/" + slug,
+      url: new URL(`/stories/${slug}`, config.baseUrl),
     },
     twitter: {
       card: "summary_large_image",
@@ -70,14 +69,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function ArticlePage({ params }: Props) {
   const { slug } = await params;
-
   const {
     mdx: MdxContent,
-    toc: TableOfContents,
-    metadata: { category, title, summary, createdAt, readTime },
+    metadata: { title, summary, createdAt, readTime },
   } = await getContent(slug);
-
-  const renderLoader = () => <div className="loader" />;
 
   return (
     <>
@@ -92,7 +87,7 @@ export default async function ArticlePage({ params }: Props) {
             description: summary,
             datePublished: createdAt,
             dateModified: createdAt,
-            url: `${config.baseUrl}/blog/${slug}`,
+            url: `${config.baseUrl}/story/${slug}`,
             author: {
               "@type": "Person",
               name: config.author,
@@ -100,10 +95,7 @@ export default async function ArticlePage({ params }: Props) {
           }),
         }}
       />
-      <section className="mb-6 space-y-6">
-        <p className="text-muted-foreground text-xs tracking-widest uppercase">
-          {category}
-        </p>
+      <section className="space-y-6 border-b pb-6">
         <h1 className="text-3xl leading-tight font-bold tracking-tight text-[var(--tw-prose-headings)] md:text-4xl">
           {title}
         </h1>
@@ -114,12 +106,11 @@ export default async function ArticlePage({ params }: Props) {
           <h6 className="list-item list-inside list-disc">{`${readTime} read`}</h6>
         </div>
       </section>
-      <Suspense fallback={renderLoader()}>
-        <TableOfContents />
-      </Suspense>
-      <Suspense fallback={renderLoader()}>
+
+      <Suspense>
         <MdxContent />
       </Suspense>
+      <p>The End</p>
     </>
   );
 }

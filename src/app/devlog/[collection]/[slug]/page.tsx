@@ -1,3 +1,4 @@
+import TableOfContents from "@/components/table-of-contents";
 import { getArticleBySlug, getArticles } from "@/lib/articles";
 import { config } from "@/lib/config";
 import { formatDate } from "@/lib/utils";
@@ -7,77 +8,64 @@ import { lazy, Suspense } from "react";
 
 type Props = {
   params: Promise<{
+    collection: string;
     slug: string;
   }>;
 };
 
-async function getContent(slug: string) {
+async function getContent(slug: string, collection: string) {
   try {
-    const { fileName, ...rest } = await getArticleBySlug(slug);
+    const { fileName } = await getArticleBySlug(slug, "devlog", collection);
 
-    return {
-      mdx: lazy(() => import(`@/content/blog/${fileName}`)),
-      toc: lazy(() => import("@/components/table-of-contents")),
-      metadata: rest,
-    };
+    return lazy(() => import(`@/content/devlog/${collection}/${fileName}`));
   } catch (error) {
     console.error("Error loading content:", error);
     throw notFound();
   }
 }
 
-export async function generateStaticParams() {
-  let paths: Array<{ slug: string }> = [];
-  const files = (await getArticles()).map((article) => ({
-    slug: article.slug,
-  }));
+export async function generateMetadata(
+  { params }: Props,
+  // parent: ResolvingMetadata,
+): Promise<Metadata> {
+  const { collection, slug } = await params;
 
-  paths = paths.concat(files);
-
-  return paths;
-}
-
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const { slug } = await params;
-  const {
-    summary: description,
-    title,
-    createdAt,
-    tags,
-  } = await getArticleBySlug(slug);
+  const article = await getArticleBySlug(slug, "devlog", collection);
 
   return {
-    title,
-    description,
-    keywords: tags,
-    publisher: config.author,
-    referrer: "origin-when-cross-origin",
-    authors: [{ name: config.author, url: config.githubUrl }],
-    openGraph: {
-      title,
-      description,
-      publishedTime: new Date(createdAt).toISOString(),
-      type: "article",
-      url: config.baseUrl + "blog/" + slug,
+    title: {
+      absolute: article.title,
     },
-    twitter: {
-      card: "summary_large_image",
-      description,
-      title,
-    },
+    keywords: article.tags,
+    description: article.summary,
   };
 }
 
-export default async function ArticlePage({ params }: Props) {
-  const { slug } = await params;
+export async function generateStaticParams() {
+  const collections = config.collections;
 
-  const {
-    mdx: MdxContent,
-    toc: TableOfContents,
-    metadata: { category, title, summary, createdAt, readTime },
-  } = await getContent(slug);
+  const params: { collection: string; slug: string }[] = [];
 
-  const renderLoader = () => <div className="loader" />;
+  collections.forEach(async (collection) => {
+    const articles = await getArticles("devlog", collection);
+    articles.forEach((article) => {
+      params.push({
+        collection: collection.toLowerCase(),
+        slug: article.slug,
+      });
+    });
+  });
+
+  return params;
+}
+
+export default async function DevlogPage({ params }: Props) {
+  const { collection, slug } = await params;
+
+  const { category, title, summary, createdAt, readTime } =
+    await getArticleBySlug(slug, "devlog", collection);
+
+  const MdxContent = await getContent(slug, collection);
 
   return (
     <>
@@ -92,7 +80,7 @@ export default async function ArticlePage({ params }: Props) {
             description: summary,
             datePublished: createdAt,
             dateModified: createdAt,
-            url: `${config.baseUrl}/blog/${slug}`,
+            url: `${config.baseUrl}${slug}`,
             author: {
               "@type": "Person",
               name: config.author,
@@ -102,7 +90,7 @@ export default async function ArticlePage({ params }: Props) {
       />
       <section className="mb-6 space-y-6">
         <p className="text-muted-foreground text-xs tracking-widest uppercase">
-          {category}
+          {collection} | {category}
         </p>
         <h1 className="text-3xl leading-tight font-bold tracking-tight text-[var(--tw-prose-headings)] md:text-4xl">
           {title}
@@ -114,10 +102,11 @@ export default async function ArticlePage({ params }: Props) {
           <h6 className="list-item list-inside list-disc">{`${readTime} read`}</h6>
         </div>
       </section>
-      <Suspense fallback={renderLoader()}>
+
+      <Suspense fallback={<div>Loading Table of Contents...</div>}>
         <TableOfContents />
       </Suspense>
-      <Suspense fallback={renderLoader()}>
+      <Suspense fallback={<div>Loading Content...</div>}>
         <MdxContent />
       </Suspense>
     </>

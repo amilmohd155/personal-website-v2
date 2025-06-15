@@ -1,23 +1,31 @@
 import { Page } from "@/components/page";
-import { Button } from "@/components/ui/button";
-import { retrieveArticleData } from "@/lib/articles";
+import { getArticles, getFilteredSortedArticles } from "@/lib/articles";
 import Link from "next/link";
-
 import { formatDate } from "@/lib/utils";
+import { Metadata } from "next";
+import { CategoryFilter } from "@/components/category-filter";
 
-const PER_PAGE = 10;
+type Params = {
+  searchParams?: Promise<{
+    filter?: string;
+  }>;
+};
 
-export default async function BlogPage() {
-  const articles = await retrieveArticleData();
+export const metadata: Metadata = {
+  title: "Blog",
+};
 
-  const filteredArticles = articles.sort(
-    (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
-  );
+const articles = await getArticles();
+const categories = [
+  "All",
+  ...new Set(articles.map((article) => article.category)),
+];
 
-  const categories = [
-    "All",
-    ...new Set(articles.map((article) => article.category)),
-  ];
+export default async function BlogPage(props: Params) {
+  const searchParams = await props.searchParams;
+  const filter = searchParams?.filter || "All";
+
+  const filteredArticles = await getFilteredSortedArticles(filter, "blog");
 
   return (
     <Page>
@@ -25,19 +33,7 @@ export default async function BlogPage() {
         <Page.Heading>Blog</Page.Heading>
 
         {/* Categories */}
-        <div className="mb-8">
-          <div className="flex flex-wrap gap-4 text-sm">
-            {categories.map((category) => (
-              <Button
-                key={category}
-                variant="link"
-                className="p-0 tracking-wider uppercase"
-              >
-                {category}
-              </Button>
-            ))}
-          </div>
-        </div>
+        <CategoryFilter categories={categories} />
 
         {/* Articles Summary */}
         <div className="max-w-4xl">
@@ -48,13 +44,13 @@ export default async function BlogPage() {
                   <div className="text-muted-foreground text-sm">
                     {article.category}
                   </div>
-                  <div className="text-sm">{formatDate(article.createdAt)}</div>
+                  <div className="text-sm">{formatDate(article.date)}</div>
                   <div className="text-muted-foreground text-sm">
                     {article.readTime}
                   </div>
                 </div>
                 <div>
-                  <Link href="/blog/example">
+                  <Link href={article.href}>
                     <h2 className="hover:text-muted-foreground mb-3 text-xl transition-colors">
                       {article.title}
                     </h2>
