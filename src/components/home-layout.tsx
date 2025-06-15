@@ -3,7 +3,7 @@ import { Page } from "./page";
 
 export function HomeLayout({ children }: { children: ReactNode }) {
   return (
-    <Page>
+    <Page className="text-muted-foreground">
       <Page.Section>
         <Page.Heading>Welcome</Page.Heading>
         {children}

@@ -8,7 +8,7 @@ import { cn } from "@/lib/utils";
 const DELAY = 200;
 const MAX_ATTEMPTS = 10;
 
-export function TableOfContents({}) {
+function TableOfContents({}) {
   const [isOpen, setIsOpen] = useState(false);
   const [headings, setHeadings] = useState<
     { id: string; text: string; level: number }[]
@@ -77,3 +77,5 @@ export function TableOfContents({}) {
     </div>
   );
 }
+
+export default TableOfContents;

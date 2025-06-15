@@ -15,11 +15,12 @@ export function ThemeToggle() {
     <Button
       variant="ghost"
       size="icon"
-      className="group/toggle size-8 text-muted-foreground"
+      className="group/toggle text-muted-foreground size-8 cursor-pointer"
+      title="Toggle theme"
       onClick={toggleTheme}
     >
       <SunIcon className="hidden [html.dark_&]:block" strokeWidth={1.625} />
-      <MoonIcon className="hidden [html.light_&]:block " strokeWidth={1.625} />
+      <MoonIcon className="hidden [html.light_&]:block" strokeWidth={1.625} />
       <span className="sr-only">Toggle theme</span>
     </Button>
   );

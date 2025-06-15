@@ -7,6 +7,7 @@ interface LinkHandlerProps extends Omit<LinkProps, "href"> {
   className?: string;
   underline?: boolean;
   bold?: boolean;
+  title?: string;
 }
 
 export function LinkHandler({
@@ -22,7 +23,7 @@ export function LinkHandler({
     underline &&
       "after:absolute after:left-0 after:bottom-1 after:h-[1px] after:w-full after:bg-accent-foreground after:opacity-0 after:transition-opacity after:duration-300 hover:after:opacity-100",
     bold && "font-medium",
-    className
+    className,
   );
 
   if (href.startsWith("/")) {

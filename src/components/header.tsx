@@ -1,4 +1,5 @@
-import { cn } from "@/lib/utils";
+"use client";
+
 import Link from "next/link";
 import * as LucideReact from "lucide-react";
 import { JSX } from "react";
@@ -6,72 +7,55 @@ import { Button } from "./ui/button";
 import { ThemeToggle } from "./theme-toggle";
 import { LinkHandler } from "./link-handler";
 import { config } from "@/lib/config";
-
-// const sections = [
-//   {
-//     name: "Blog",
-//   },
-//   {
-//     name: "Projects",
-//   },
-// ];
-
-type NavIconItem = {
-  title: string;
-  href: string;
-  icon: keyof typeof LucideReact;
-};
-
-const navIconItems: NavIconItem[] = [
-  {
-    title: "Skills",
-    href: "/skills",
-    icon: "Code",
-  },
-  {
-    title: "Stories",
-    href: "/stories",
-    icon: "PenTool",
-  },
-  {
-    title: "Art",
-    href: "/art",
-    icon: "Image",
-  },
-  {
-    title: "Contact",
-    href: "/contact",
-    icon: "Mail",
-  },
-  {
-    title: "Github",
-    href: "",
-    icon: "Github",
-  },
-];
+import { AnimatedLogo } from "./animated-logo";
+import { MobileNav } from "./mobile-nav";
+import { navIconItems } from "@/lib/header";
+import { usePathname } from "next/navigation";
+import { cn } from "@/lib/utils";
 
 export function Header() {
+  const pathName = usePathname();
+
   return (
-    <header className="px-4 py-6">
+    <header className="px-3 py-6 md:px-8">
       <div className="flex items-center justify-between">
-        <Link href="/" className="text-xl font-bold tracking-tight uppercase">
-          AM
+        <Link href="/" className="text-xl font-bold tracking-wider">
+          {/* / me / */}
+          <AnimatedLogo />
         </Link>
         <span className="flex items-center justify-end gap-4">
           <nav className="hidden items-center gap-4 md:flex">
-            {config.sections.map((section) => (
-              <Link
-                key={section.name}
-                href={`/${section.name.toLowerCase()}`}
-                className="text-muted-foreground hover:text-foreground text-sm tracking-wide capitalize"
-              >
-                {section.name}
-              </Link>
-            ))}
+            {config.sections.map((section) => {
+              const isActive =
+                pathName.split("/")[1] === section.name.toLowerCase();
+              return (
+                <LinkHandler
+                  key={section.name}
+                  href={`/${section.name.toLowerCase()}`}
+                  title={section.name}
+                  className={cn(
+                    "text-muted-foreground hover:text-foreground text-sm tracking-wide capitalize",
+                    isActive && "text-foreground",
+                  )}
+                >
+                  {section.name}
+                </LinkHandler>
+              );
+            })}
           </nav>
-          <div className="mr-2 flex items-center">
+          <div className="hidden items-center md:flex">
             {navIconItems.map((item) => {
               const Icon = LucideReact[item.icon] as JSX.ElementType;
+              if (
+                process.env.NEXT_PUBLIC_DEVLOG === "false" &&
+                item.href === "/devlog"
+              ) {
+                return null; // Skip rendering if DEVLOG is disabled
+              }
+
+              const isActive =
+                pathName.split("/")[1] === item.href.split("/")[1];
+
               return (
                 <Button
                   asChild
@@ -79,9 +63,12 @@ export function Header() {
                   size="icon"
                   key={item.title}
                   aria-label={item.title}
-                  className="text-muted-foreground px-0"
+                  className={cn(
+                    "text-muted-foreground px-0",
+                    isActive && "text-foreground",
+                  )}
                 >
-                  <LinkHandler href={item.href}>
+                  <LinkHandler href={item.href} title={item.title}>
                     <Icon strokeWidth={1.5} />
                     <span className="sr-only">{item.title}</span>
                   </LinkHandler>
@@ -91,7 +78,7 @@ export function Header() {
             {/* Theme Toggle */}
             <ThemeToggle />
           </div>
-          {/* <MobileNav /> */}
+          <MobileNav />
         </span>
       </div>
     </header>

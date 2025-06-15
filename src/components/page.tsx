@@ -8,9 +8,9 @@ export function Page({
   return (
     <main
       className={cn(
-        "min-h-screen w-full mx-auto bg-background text-foreground flex flex-col",
+        "bg-background text-foreground mx-auto flex min-h-[81vh] w-full flex-col",
         "max-w-[70ch]",
-        className
+        className,
       )}
     >
       {children}
@@ -23,7 +23,7 @@ function Section({
   className,
 }: React.PropsWithChildren<{ className?: string }>) {
   return (
-    <section className={cn("flex-1 px-4 md:px-6 py-6 md:py-12", className)}>
+    <section className={cn("flex-1 px-4 py-6 md:px-6 md:py-12", className)}>
       {children}
     </section>
   );
@@ -34,7 +34,7 @@ function Heading({
   className,
 }: React.PropsWithChildren<{ className?: string }>) {
   return (
-    <h1 className={cn("text-3xl md:text-4xl font-medium mb-6", className)}>
+    <h1 className={cn("mb-6 text-3xl font-medium md:text-4xl", className)}>
       {children}
     </h1>
   );
