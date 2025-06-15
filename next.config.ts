@@ -28,6 +28,15 @@ const nextConfig: NextConfig = {
   },
   pageExtensions: ["js", "jsx", "md", "mdx", "ts", "tsx"],
   reactStrictMode: true,
+  webpack: (config, { dev }) => {
+    if (config.cache && !dev) {
+      config.cache = Object.freeze({
+        type: "memory",
+      });
+    }
+    // Important: return the modified config
+    return config;
+  },
   // webpack: (config, { dev }) => {
   //   // minify class names (does not apply to tailwindcss) (e.g. .my-class--active -> .xSrdL)
   //   config.module.rules.forEach((rule: any) => {
