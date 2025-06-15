@@ -17,7 +17,7 @@ export function ContactLayout({ children }: { children: React.ReactNode }) {
 
 export const LinkGroup = () => (
   <>
-    <div className="flex space-x-4">
+    <div className="flex flex-col gap-y-2 md:flex-row md:gap-x-4">
       <Button asChild variant="outline">
         <LinkHandler
           href="&#109;ai&#108;to&#58;%&#54;1milmohd1&#37;355&#64;gmail&#46;&#99;o&#109;"
