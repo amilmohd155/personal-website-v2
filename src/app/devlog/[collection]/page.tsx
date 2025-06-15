@@ -29,7 +29,6 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 export async function generateStaticParams() {
-  console.log("Generating static params for devlog collections");
   return config.collections.map((collection) => ({
     collection: collection.toLowerCase(),
   }));

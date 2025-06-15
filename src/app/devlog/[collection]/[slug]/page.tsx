@@ -48,12 +48,14 @@ export async function generateStaticParams() {
 
   collections.forEach(async (collection) => {
     const articles = await getArticles("devlog", collection);
-    articles.forEach((article) => {
-      params.push({
-        collection: collection.toLowerCase(),
-        slug: article.slug,
+    articles
+      .filter((article) => article.published)
+      .forEach((article) => {
+        params.push({
+          collection: collection.toLowerCase(),
+          slug: article.slug,
+        });
       });
-    });
   });
 
   return params;

@@ -17,10 +17,11 @@ export const metadata: Metadata = {
   //   default: config.author,
   //   template: `%s | ${config.author}`,
   // },
-  title: config.author,
+  title: config.title,
+  authors: [{ name: config.author, url: config.githubUrl }],
+  creator: config.author,
   keywords: ["Portfolio", "Blog", "Devlog"],
-  description:
-    "Amil Muhammed Hamza's personal portfolio website and blogging platform.",
+  description: config.description,
 };
 
 export default function RootLayout({
