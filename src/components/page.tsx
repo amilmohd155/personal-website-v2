@@ -8,8 +8,8 @@ export function Page({
   return (
     <main
       className={cn(
-        "bg-background text-foreground mx-auto flex min-h-[81vh] w-full flex-col",
-        "max-w-[70ch]",
+        "bg-background text-foreground mx-auto flex min-h-[80vh] w-full flex-col",
+        "max-w-[80ch]",
         className,
       )}
     >

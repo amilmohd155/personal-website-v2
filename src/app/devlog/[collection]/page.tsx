@@ -68,7 +68,7 @@ export default async function CollectionPage({ params, searchParams }: Props) {
               <div className="grid gap-6 md:grid-cols-[1fr_3fr] md:gap-12">
                 <div className="text-muted-foreground mt-0.5 hidden space-y-1 text-sm md:block">
                   <p>{article.category}</p>
-                  <p>{formatDate(article.createdAt)}</p>
+                  <p>{formatDate(article.date)}</p>
                   <p>{article.readTime}</p>
                 </div>
                 <div>
