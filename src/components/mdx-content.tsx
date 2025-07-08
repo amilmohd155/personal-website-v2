@@ -107,6 +107,7 @@ const sharedComponents = {
       style={{ width: "100%", height: "auto" }}
     />
   ),
+  Image,
 };
 
 // parse the Velite generated MDX code into a React component function
