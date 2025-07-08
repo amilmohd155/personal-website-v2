@@ -3,11 +3,12 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
-    "turbo": "next dev --turbo",
+    "dev": "next dev --turbo",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
+    "velite": "velite build --clean",
+    "velite:watch": "velite build --watch",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
@@ -50,8 +51,10 @@
     "rehype-autolink-headings": "^7.1.0",
     "rehype-slug": "^6.0.0",
     "tailwindcss": "^4",
+    "turbo": "^2.5.4",
     "tw-animate-css": "^1.2.9",
     "typescript": "^5",
     "velite": "^0.2.4"
-  }
+  },
+  "packageManager": "pnpm@10.9.0"
 }
