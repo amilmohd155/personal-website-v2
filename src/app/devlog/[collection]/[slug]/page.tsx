@@ -1,4 +1,5 @@
 import { MDXContent } from "@/components/mdx-content";
+import TableOfContents from "@/components/table-of-contents";
 import { config } from "@/lib/config";
 import { formatDate } from "@/lib/utils";
 import { devlog, devlogCollections } from "@content";
@@ -41,6 +42,7 @@ export default async function DevlogPage({ params }: Props) {
     summary,
     date: createdAt,
     readTime,
+    toc,
     body,
   } = getArticleBySlug(slug, collection);
 
@@ -80,9 +82,9 @@ export default async function DevlogPage({ params }: Props) {
         </div>
       </section>
 
-      {/* <Suspense fallback={<div>Loading Table of Contents...</div>}>
-        <TableOfContents />
-      </Suspense> */}
+      <Suspense fallback={<div>Loading Table of Contents...</div>}>
+        <TableOfContents toc={toc} />
+      </Suspense>
       <Suspense fallback={<div>Loading Content...</div>}>
         <MDXContent code={body} />
       </Suspense>

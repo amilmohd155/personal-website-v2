@@ -5,6 +5,7 @@ import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { blogs } from "@content";
 import { MDXContent } from "@/components/mdx-content";
+import TableOfContents from "@/components/table-of-contents";
 
 type Props = {
   params: Promise<{
@@ -70,9 +71,9 @@ export default async function ArticlePage({ params }: Props) {
           <h6 className="list-item list-inside list-disc">{`${readTime} read`}</h6>
         </div>
       </section>
-      {/* <Suspense fallback={renderLoader()}>
-        <TableOfContents />
-      </Suspense> */}
+      <Suspense fallback={renderLoader()}>
+        <TableOfContents toc={toc} />
+      </Suspense>
       <Suspense fallback={renderLoader()}>
         <MDXContent code={body} />
       </Suspense>

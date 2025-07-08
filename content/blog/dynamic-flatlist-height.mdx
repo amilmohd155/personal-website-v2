@@ -10,28 +10,27 @@ tags:
 ---
 
 
-
 Most of us are familiar with FlatList, the backbone of performant scrollable lists in React Native. But when you start customizing things—like making the height of each page dynamic based on its content in a horizontally paged FlatList—it can get tricky.
 
 In this post, I’ll walk you through how to **dynamically animate the height of a horizontal FlatList** based on each item’s content height. This makes your UI not just look polished but feel buttery smooth.
 
-## **Why Dynamic Height?**
+## Why Dynamic Height?
 
 By default, FlatList uses the same height for all its items (Height of the largest element). If your list is paginated horizontally (pagingEnabled), and each “page” (item) has a different height, you’ll run into two options:
 
 1. Give the FlatList a fixed height (🫤 UX).
 2. Measure each item’s height and animate the list container height to match it (👌 yes, please!).
 
-## **Tools of the Trade**
+## Tools of the Trade
 
 * [FlatList](https://reactnative.dev/docs/flatlist) for horizontal pagination
 * [onLayout](https://reactnative.dev/docs/view#onlayout) to measure item height
 * [react-native-reanimated](https://docs.swmansion.com/react-native-reanimated/) for smooth animations
 * Animated.FlatList and withTiming for animated transitions
 
-## **Key Concepts and Logic** 
+## Key Concepts and Logic
 
-### **Measure Item Height Dynamically**
+### Measure Item Height Dynamically
 
 Each item in the FlatList has different height content. To adjust the container’s height, we must first **know** each item’s height.
 
@@ -52,7 +51,7 @@ This function is triggered *once* per item, and reports the height back to the p
 
 > hasMeasured ensures we don’t keep updating the height over and over (which would cause performance issues).
 
-### **Store Heights Indexed by Item**
+### Store Heights Indexed by Item
 
 In the parent, we store item heights like this:
 
@@ -77,7 +76,7 @@ This gives us a mapping from FlatList index → measured height.
 > We set the height of the first element instantly without any transition effects to guarantee that the initial item displays correctly.
 
 
-### **Track Scroll Position Using Reanimated (Optional)**
+### Track Scroll Position Using Reanimated (Optional)
 
 We want the FlatList’s height to change as you swipe between pages. To do that, we need to know **which page is visible**.
 
@@ -97,7 +96,7 @@ This gives us live access to the scroll position, which we can use to calculate 
 > Optional: You can employ alternative methods to determine the current index.
 
 
-### **Calculate and Animate the Height**
+### Calculate and Animate the Height
 
 We use useAnimatedStyle to dynamically compute and animate the FlatList’s container height:
 
@@ -125,7 +124,7 @@ Let’s break this down:
 > Bonus: withTiming makes the transition smooth. No jank!
 
 
-## **Putting It All Together**
+## Putting It All Together
 
 ```tsx
 export default function App() {
@@ -216,7 +215,7 @@ export const RenderItem = memo(({ item, index, onHeightMeasured }: Props) => {
 });
 ```
 
-## **Final Result**
+## Final Result
 
 What you get is a FlatList that:
 
@@ -226,18 +225,18 @@ What you get is a FlatList that:
 
 This is great for **quizzes**, **walkthroughs**, **onboarding screens**, and any horizontally scrollable pages with content that varies in size.
 
-## **Gotchas and Tips**
+## Gotchas and Tips
 
 * Make sure every item actually renders before it’s measured.
 * Avoid updating state on every scroll — only update height when it’s different.
 * Use useMemo or useCallback to prevent unnecessary renders.
 * You can cache height measurements for performance (if items don’t change
 
-## **Wrapping Up**
+## Wrapping Up
 
 Animating FlatList height dynamically is a clean and elegant UX trick that separates polished apps from average ones. With just onLayout, a bit of useSharedValue, and a smooth withTiming, you can build scrollable lists that feel alive and adaptive.
 
-## **Want to see a demo?**
+## Want to see a demo?
 
 Check out this [snack](https://snack.expo.dev/@docren155/dynamic-item-height-for-horizontal-flatlist?platform=ios)
 

@@ -49,10 +49,10 @@ export function CodeBlock({
         <button
           onClick={handleCopy}
           className="flex cursor-pointer flex-row items-center gap-x-2 opacity-50 transition-all duration-200 ease-in-out hover:opacity-100 active:scale-95 active:opacity-50"
-          aria-label="Copy code"
+          aria-label={copied ? "Copied" : "Copy"}
         >
           {copied ? "Copied!" : "Copy"}
-          <span className="sr-only">Copy code</span>
+
           {copied ? (
             <Check className="h-4 w-4 text-green-500" />
           ) : (
