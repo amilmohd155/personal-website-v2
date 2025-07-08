@@ -4,7 +4,6 @@ import remarkGfm from "remark-gfm";
 import highlight from "remark-sugar-high";
 import rehypeAutolinkHeadings from "rehype-autolink-headings";
 import rehypeSlug from "rehype-slug";
-import bundleAnalyzer from "@next/bundle-analyzer";
 
 const nextConfig: NextConfig = {
   cleanDistDir: true,
@@ -29,15 +28,15 @@ const nextConfig: NextConfig = {
   },
   pageExtensions: ["js", "jsx", "md", "mdx", "ts", "tsx"],
   reactStrictMode: true,
-  // webpack: (config, { dev }) => {
-  //   if (config.cache && !dev) {
-  //     config.cache = Object.freeze({
-  //       type: "memory",
-  //     });
-  //   }
-  //   // Important: return the modified config
-  //   return config;
-  // },
+  webpack: (config, { dev }) => {
+    if (config.cache && !dev) {
+      config.cache = Object.freeze({
+        type: "memory",
+      });
+    }
+    // Important: return the modified config
+    return config;
+  },
   // webpack: (config, { dev }) => {
   //   // minify class names (does not apply to tailwindcss) (e.g. .my-class--active -> .xSrdL)
   //   config.module.rules.forEach((rule: any) => {
@@ -91,8 +90,4 @@ const withMdx = createMDX({
   },
 });
 
-const withBundleAnalyzer = bundleAnalyzer({
-  enabled: process.env.ANALYZE === "true",
-});
-
-export default withBundleAnalyzer(withMdx(nextConfig));
+export default withMdx(nextConfig);
