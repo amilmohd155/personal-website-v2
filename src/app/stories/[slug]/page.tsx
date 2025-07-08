@@ -94,6 +94,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     openGraph: {
       title,
       description,
+      siteName: config.title,
       publishedTime: new Date(createdAt).toISOString(),
       type: "article",
       url: new URL(`/stories/${slug}`, config.baseUrl),

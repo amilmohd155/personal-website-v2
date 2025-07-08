@@ -15,7 +15,6 @@ export default async function Image({
 
   return new ImageResponse(
     (
-      // ImageResponse JSX element
       <div
         style={{
           background: "#17181C",

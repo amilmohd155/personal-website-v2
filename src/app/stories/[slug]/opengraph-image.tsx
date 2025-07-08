@@ -1,6 +1,7 @@
 import { config } from "@/lib/config";
 import { stories } from "@content";
 import { ImageResponse } from "next/og";
+import { NextResponse } from "next/server";
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 
@@ -20,11 +21,10 @@ export default async function Image({ params: { slug } }: Props) {
 
   const article = stories.find((story) => story.slug === slug);
 
-  if (!article) return null;
+  if (!article) return NextResponse.error;
 
   return new ImageResponse(
     (
-      // ImageResponse JSX element
       <div
         style={{
           background: "#17181C",
@@ -48,5 +48,8 @@ export default async function Image({ params: { slug } }: Props) {
         </div>
       </div>
     ),
+    {
+      ...size,
+    },
   );
 }

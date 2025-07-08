@@ -1,6 +1,7 @@
 import { config } from "@/lib/config";
 import { devlog } from "@content";
 import { ImageResponse } from "next/og";
+import { NextResponse } from "next/server";
 
 export const size = { width: 1200, height: 630 };
 
@@ -15,16 +16,15 @@ export default async function Image({
   const { collection, slug } = params;
 
   const article = devlog.find(
-    (item) => item.slug === slug && item.category === collection,
+    (item) => item.slug === slug && item.collection === collection,
   );
 
   if (!article) {
-    return null;
+    return NextResponse.error;
   }
 
   return new ImageResponse(
     (
-      // ImageResponse JSX element
       <div
         style={{
           background: "#17181C",
@@ -44,5 +44,8 @@ export default async function Image({
         </div>
       </div>
     ),
+    {
+      ...size,
+    },
   );
 }
