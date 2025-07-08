@@ -1,5 +1,5 @@
-import { getArticleBySlug } from "@/lib/articles";
 import { config } from "@/lib/config";
+import { devlog } from "@content";
 import { ImageResponse } from "next/og";
 
 export const size = { width: 1200, height: 630 };
@@ -14,7 +14,13 @@ export default async function Image({
 }) {
   const { collection, slug } = params;
 
-  const article = await getArticleBySlug(slug, "devlog", collection);
+  const article = devlog.find(
+    (item) => item.slug === slug && item.category === collection,
+  );
+
+  if (!article) {
+    return null;
+  }
 
   return new ImageResponse(
     (

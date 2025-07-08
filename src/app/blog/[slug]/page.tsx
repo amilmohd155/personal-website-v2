@@ -1,9 +1,10 @@
-import { getArticleBySlug, getArticles } from "@/lib/articles";
 import { config } from "@/lib/config";
 import { formatDate } from "@/lib/utils";
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { lazy, Suspense } from "react";
+import { Suspense } from "react";
+import { blogs } from "@content";
+import { MDXContent } from "@/components/mdx-content";
 
 type Props = {
   params: Promise<{
@@ -11,71 +12,26 @@ type Props = {
   }>;
 };
 
-async function getContent(slug: string) {
+async function getBlogBySlug(slug: string) {
   try {
-    const { fileName, ...rest } = await getArticleBySlug(slug);
+    const article = blogs.find((article) => article.slug === slug);
 
-    return {
-      mdx: lazy(() => import(`@/content/blog/${fileName}`)),
-      toc: lazy(() => import("@/components/table-of-contents")),
-      metadata: rest,
-    };
+    if (!article) {
+      throw new Error(`Article with slug "${slug}" not found`);
+    }
+
+    return article;
   } catch (error) {
     console.error("Error loading content:", error);
     throw notFound();
   }
 }
 
-export async function generateStaticParams() {
-  let paths: Array<{ slug: string }> = [];
-  const files = (await getArticles()).map((article) => ({
-    slug: article.slug,
-  }));
-
-  paths = paths.concat(files);
-
-  return paths;
-}
-
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const { slug } = await params;
-  const {
-    summary: description,
-    title,
-    createdAt,
-    tags,
-  } = await getArticleBySlug(slug);
-
-  return {
-    title,
-    description,
-    keywords: tags,
-    publisher: config.author,
-    referrer: "origin-when-cross-origin",
-    authors: [{ name: config.author, url: config.githubUrl }],
-    openGraph: {
-      title,
-      description,
-      publishedTime: new Date(createdAt).toISOString(),
-      type: "article",
-      url: config.baseUrl + "blog/" + slug,
-    },
-    twitter: {
-      card: "summary_large_image",
-      description,
-      title,
-    },
-  };
-}
-
 export default async function ArticlePage({ params }: Props) {
   const { slug } = await params;
 
-  const {
-    mdx: MdxContent,
-    toc: TableOfContents,
-    metadata: { category, title, summary, createdAt, readTime },
-  } = await getContent(slug);
+  const { title, summary, category, date, readTime, body, toc } =
+    await getBlogBySlug(slug);
 
   const renderLoader = () => <div className="loader" />;
 
@@ -90,8 +46,8 @@ export default async function ArticlePage({ params }: Props) {
             "@type": "BlogPosting",
             headline: title,
             description: summary,
-            datePublished: createdAt,
-            dateModified: createdAt,
+            datePublished: date,
+            dateModified: date,
             url: `${config.baseUrl}/blog/${slug}`,
             author: {
               "@type": "Person",
@@ -109,17 +65,54 @@ export default async function ArticlePage({ params }: Props) {
         </h1>
         <p className="text-muted flex justify-between">{summary}</p>
         <div className="text-muted-foreground flex flex-row gap-x-4 text-sm">
-          <h6>{formatDate(createdAt)}</h6>
+          <h6>{formatDate(date)}</h6>
 
           <h6 className="list-item list-inside list-disc">{`${readTime} read`}</h6>
         </div>
       </section>
-      <Suspense fallback={renderLoader()}>
+      {/* <Suspense fallback={renderLoader()}>
         <TableOfContents />
-      </Suspense>
+      </Suspense> */}
       <Suspense fallback={renderLoader()}>
-        <MdxContent />
+        <MDXContent code={body} />
       </Suspense>
     </>
   );
+}
+
+export async function generateStaticParams() {
+  return blogs.map((article) => ({
+    slug: article.slug,
+  }));
+}
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { slug } = await params;
+  const {
+    summary: description,
+    title,
+    date: createdAt,
+    tags,
+  } = await getBlogBySlug(slug);
+
+  return {
+    title,
+    description,
+    keywords: tags,
+    publisher: config.author,
+    referrer: "origin-when-cross-origin",
+    authors: [{ name: config.author, url: config.githubUrl }],
+    openGraph: {
+      title,
+      description,
+      publishedTime: new Date(createdAt).toISOString(),
+      type: "article",
+      url: config.baseUrl + "/blog/" + slug,
+    },
+    twitter: {
+      card: "summary_large_image",
+      description,
+      title,
+    },
+  };
 }

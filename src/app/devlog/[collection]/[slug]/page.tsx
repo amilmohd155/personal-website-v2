@@ -1,10 +1,10 @@
-import TableOfContents from "@/components/table-of-contents";
-import { getArticleBySlug, getArticles } from "@/lib/articles";
+import { MDXContent } from "@/components/mdx-content";
 import { config } from "@/lib/config";
 import { formatDate } from "@/lib/utils";
+import { devlog, devlogCollections } from "@content";
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { lazy, Suspense } from "react";
+import { Suspense } from "react";
 
 type Props = {
   params: Promise<{
@@ -13,61 +13,36 @@ type Props = {
   }>;
 };
 
-async function getContent(slug: string, collection: string) {
+function getArticleBySlug(slug: string, collection: string) {
   try {
-    const { fileName } = await getArticleBySlug(slug, "devlog", collection);
+    const article = devlog.find(
+      (article) =>
+        article.slug === slug &&
+        article.collection === collection &&
+        article.published,
+    );
 
-    return lazy(() => import(`@/content/devlog/${collection}/${fileName}`));
+    if (!article) {
+      throw new Error("Article not found");
+    }
+    return article;
   } catch (error) {
     console.error("Error loading content:", error);
     throw notFound();
   }
 }
 
-export async function generateMetadata(
-  { params }: Props,
-  // parent: ResolvingMetadata,
-): Promise<Metadata> {
-  const { collection, slug } = await params;
-
-  const article = await getArticleBySlug(slug, "devlog", collection);
-
-  return {
-    title: {
-      absolute: article.title,
-    },
-    keywords: article.tags,
-    description: article.summary,
-  };
-}
-
-export async function generateStaticParams() {
-  const collections = config.collections;
-
-  const params: { collection: string; slug: string }[] = [];
-
-  collections.forEach(async (collection) => {
-    const articles = await getArticles("devlog", collection);
-    articles
-      .filter((article) => article.published)
-      .forEach((article) => {
-        params.push({
-          collection: collection.toLowerCase(),
-          slug: article.slug,
-        });
-      });
-  });
-
-  return params;
-}
-
 export default async function DevlogPage({ params }: Props) {
   const { collection, slug } = await params;
 
-  const { category, title, summary, createdAt, readTime } =
-    await getArticleBySlug(slug, "devlog", collection);
-
-  const MdxContent = await getContent(slug, collection);
+  const {
+    category,
+    title,
+    summary,
+    date: createdAt,
+    readTime,
+    body,
+  } = getArticleBySlug(slug, collection);
 
   return (
     <>
@@ -82,7 +57,7 @@ export default async function DevlogPage({ params }: Props) {
             description: summary,
             datePublished: createdAt,
             dateModified: createdAt,
-            url: `${config.baseUrl}${slug}`,
+            url: `${config.baseUrl}/${slug}`,
             author: {
               "@type": "Person",
               name: config.author,
@@ -105,12 +80,44 @@ export default async function DevlogPage({ params }: Props) {
         </div>
       </section>
 
-      <Suspense fallback={<div>Loading Table of Contents...</div>}>
+      {/* <Suspense fallback={<div>Loading Table of Contents...</div>}>
         <TableOfContents />
-      </Suspense>
+      </Suspense> */}
       <Suspense fallback={<div>Loading Content...</div>}>
-        <MdxContent />
+        <MDXContent code={body} />
       </Suspense>
     </>
   );
+}
+
+export async function generateStaticParams() {
+  const params = devlogCollections.collections.flatMap((c) => {
+    const collection = c.name.toLowerCase();
+
+    return devlog
+      .filter((article) => article.collection === c.name && article.published)
+      .map((article) => ({
+        collection,
+        slug: article.slug,
+      }));
+  });
+
+  return params;
+}
+
+export async function generateMetadata(
+  { params }: Props,
+  // parent: ResolvingMetadata,
+): Promise<Metadata> {
+  const { collection, slug } = await params;
+
+  const article = getArticleBySlug(slug, collection);
+
+  return {
+    title: {
+      absolute: article.title,
+    },
+    keywords: article.tags,
+    description: article.summary,
+  };
 }

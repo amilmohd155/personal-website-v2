@@ -46,12 +46,6 @@ export function Header() {
           <div className="hidden items-center md:flex">
             {navIconItems.map((item) => {
               const Icon = LucideReact[item.icon] as JSX.ElementType;
-              if (
-                process.env.NEXT_PUBLIC_DEVLOG === "false" &&
-                item.href === "/devlog"
-              ) {
-                return null; // Skip rendering if DEVLOG is disabled
-              }
 
               const isActive =
                 pathName.split("/")[1] === item.href.split("/")[1];

@@ -1,5 +1,5 @@
-import { getArticleBySlug } from "@/lib/articles";
 import { config } from "@/lib/config";
+import { stories } from "@content";
 import { ImageResponse } from "next/og";
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
@@ -18,7 +18,9 @@ export default async function Image({ params: { slug } }: Props) {
   const bgBase64 = Buffer.from(bgData).toString("base64");
   const bgImageSrc = `data:image/jpeg;base64,${bgBase64}`;
 
-  const article = await getArticleBySlug(slug, "stories");
+  const article = stories.find((story) => story.slug === slug);
+
+  if (!article) return null;
 
   return new ImageResponse(
     (

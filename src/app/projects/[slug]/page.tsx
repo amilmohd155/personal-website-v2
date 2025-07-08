@@ -1,11 +1,12 @@
 import { LinkHandler } from "@/components/link-handler";
+import { MDXContent } from "@/components/mdx-content";
 import { Button } from "@/components/ui/button";
-import { getArticleBySlug, getArticles } from "@/lib/articles";
 import { config } from "@/lib/config";
 import { formatDate } from "@/lib/utils";
+import { projects } from "@content";
 import { Github, Globe } from "lucide-react";
 import { notFound } from "next/navigation";
-import { lazy, Suspense } from "react";
+import { Suspense } from "react";
 
 type Params = {
   params: Promise<{
@@ -13,49 +14,31 @@ type Params = {
   }>;
 };
 
-async function getContent(slug: string) {
+function getContent(slug: string) {
   try {
-    const { fileName } = await getArticleBySlug(slug, "project");
-
-    return lazy(() => import(`@/content/projects/${fileName}`));
+    const project = projects.find((project) => project.slug === slug);
+    if (!project) {
+      throw new Error(`Project with slug "${slug}" not found`);
+    }
+    return project;
   } catch (error) {
     console.error("Error loading content:", error);
     throw notFound();
   }
 }
 
-export async function generateMetadata({ params }: Params) {
-  const { slug } = await params;
-
-  const { title, summary } = await getArticleBySlug(slug, "project");
-
-  return {
-    title: `Project | ${title}`,
-    description: summary,
-  };
-}
-
-export async function generateStaticParams() {
-  const articles = await getArticles("project");
-
-  const params: { slug: string }[] = [];
-
-  articles.map((article) =>
-    params.push({
-      slug: article.slug,
-    }),
-  );
-
-  return params;
-}
-
 export default async function ProjectPage({ params }: Params) {
   const { slug } = await params;
 
-  const { category, title, summary, createdAt, demo, repository } =
-    await getArticleBySlug(slug, "project");
-
-  const MdxContent = await getContent(slug);
+  const {
+    title,
+    category,
+    summary,
+    date: createdAt,
+    repository,
+    demo,
+    body,
+  } = getContent(slug);
 
   return (
     <>
@@ -109,8 +92,23 @@ export default async function ProjectPage({ params }: Params) {
       </section>
 
       <Suspense fallback={<div>Loading Content...</div>}>
-        <MdxContent />
+        <MDXContent code={body} />
       </Suspense>
     </>
   );
+}
+
+export async function generateStaticParams() {
+  return projects.map((project) => ({ slug: project.slug }));
+}
+
+export async function generateMetadata({ params }: Params) {
+  const { slug } = await params;
+
+  const { title, summary } = getContent(slug);
+
+  return {
+    title: `Project | ${title}`,
+    description: summary,
+  };
 }

@@ -4,11 +4,6 @@ export const config = {
   baseUrl: process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000",
   description:
     "A digital space for building and storytelling — blending full-stack web and mobile development with original short stories. Featuring projects, technical insights, and narrative experiments crafted with code and creativity.",
-  blogDirectory: "src/content/blog",
-  devlogDirectory: "src/content/devlog",
-  projectDirectory: "src/content/projects",
-  storyDirectory: "src/content/stories",
-  artDirectory: "src/content/art",
   repository: "https://github.com/amilmohd155/personal-website-v2",
   resumeUrl:
     "https://cufknazmgyuxwsd4.public.blob.vercel-storage.com/Amil_Resume-lBBdbIaVpcMXifgtXhKl5XOk1wl9QH.pdf",
@@ -16,7 +11,6 @@ export const config = {
     name: "MIT",
     url: "https://opensource.org/license/mit/",
   },
-  collections: ["quizcript"],
   sections: [
     {
       name: "Blog",

@@ -1,6 +1,6 @@
 import { CategoryFilter } from "@/components/category-filter";
 import { Page } from "@/components/page";
-import { getArticles, getFilteredSortedArticles } from "@/lib/articles";
+import { projects } from "@content";
 import { Metadata } from "next";
 import Link from "next/link";
 import { Suspense } from "react";
@@ -15,11 +15,9 @@ export const metadata: Metadata = {
   title: "Projects",
 };
 
-const articles = await getArticles("project");
-
 const categories = [
   "All",
-  ...new Set(articles.map((article) => article.category)),
+  ...new Set(projects.map((project) => project.category)),
 ];
 
 export default async function ProjectPage(props: Params) {
@@ -45,12 +43,19 @@ export default async function ProjectPage(props: Params) {
 }
 
 const ProjectListings = async ({ filter }: { filter: string }) => {
-  const articles = await getFilteredSortedArticles(filter, "project");
+  const filteredProjects = projects
+    .sort((a, b) => {
+      return new Date(b.date).getTime() - new Date(a.date).getTime();
+    })
+    .filter((project) => {
+      if (filter === "All") return true;
+      return project.category === filter;
+    });
 
   return (
     <div className="max-w-4xl">
-      {articles.map((article) => (
-        <Link href={article.href} key={article.id} className="group">
+      {filteredProjects.map((article) => (
+        <Link href={article.permalink} key={article.slug} className="group">
           <article className="group-hover:bg-muted/30 -mx-4 mb-4 space-y-3 overflow-hidden rounded-lg px-4 py-2 transition-colors">
             <div className="space-y-2">
               <h2 className="text-xl transition-colors">{article.title}</h2>

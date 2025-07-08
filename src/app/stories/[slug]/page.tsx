@@ -1,9 +1,10 @@
-import { getArticleBySlug, getArticles } from "@/lib/articles";
+import { MDXContent } from "@/components/mdx-content";
 import { config } from "@/lib/config";
 import { formatDate } from "@/lib/utils";
+import { stories } from "@content";
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { lazy, Suspense } from "react";
+import { Suspense } from "react";
 
 type Props = {
   params: Promise<{
@@ -11,68 +12,29 @@ type Props = {
   }>;
 };
 
-async function getContent(slug: string) {
+function getStoryBySlug(slug: string) {
   try {
-    const { fileName, ...rest } = await getArticleBySlug(slug, "stories");
-
-    return {
-      mdx: lazy(() => import(`@/content/stories/${fileName}`)),
-      metadata: rest,
-    };
+    const story = stories.find((article) => article.slug === slug);
+    if (!story) {
+      throw new Error(`Story with slug "${slug}" not found`);
+    }
+    return story;
   } catch (error) {
     console.error("Error loading content:", error);
     throw notFound();
   }
 }
 
-export async function generateStaticParams() {
-  let paths: Array<{ slug: string }> = [];
-  const files = (await getArticles("stories")).map((article) => ({
-    slug: article.slug,
-  }));
-
-  paths = paths.concat(files);
-
-  return paths;
-}
-
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const { slug } = await params;
-  const {
-    summary: description,
-    title,
-    createdAt,
-    tags,
-  } = await getArticleBySlug(slug, "stories");
-
-  return {
-    title,
-    description,
-    keywords: tags,
-    publisher: config.author,
-    referrer: "origin-when-cross-origin",
-    authors: [{ name: config.author, url: config.githubUrl }],
-    openGraph: {
-      title,
-      description,
-      publishedTime: new Date(createdAt).toISOString(),
-      type: "article",
-      url: new URL(`/stories/${slug}`, config.baseUrl),
-    },
-    twitter: {
-      card: "summary_large_image",
-      description,
-      title,
-    },
-  };
-}
-
 export default async function ArticlePage({ params }: Props) {
   const { slug } = await params;
+
   const {
-    mdx: MdxContent,
-    metadata: { title, summary, createdAt, readTime },
-  } = await getContent(slug);
+    title,
+    summary,
+    date: createdAt,
+    readTime,
+    body,
+  } = getStoryBySlug(slug);
 
   return (
     <>
@@ -108,9 +70,38 @@ export default async function ArticlePage({ params }: Props) {
       </section>
 
       <Suspense>
-        <MdxContent />
+        <MDXContent code={body} />
       </Suspense>
       <p>The End</p>
     </>
   );
+}
+
+export async function generateStaticParams() {
+  return stories.map((story) => ({ slug: story.slug }));
+}
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { slug } = await params;
+  const { summary: description, title, date: createdAt } = getStoryBySlug(slug);
+
+  return {
+    title,
+    description,
+    publisher: config.author,
+    referrer: "origin-when-cross-origin",
+    authors: [{ name: config.author, url: config.githubUrl }],
+    openGraph: {
+      title,
+      description,
+      publishedTime: new Date(createdAt).toISOString(),
+      type: "article",
+      url: new URL(`/stories/${slug}`, config.baseUrl),
+    },
+    twitter: {
+      card: "summary_large_image",
+      description,
+      title,
+    },
+  };
 }
