@@ -78,7 +78,7 @@ export default async function DevlogPage({ params }: Props) {
         <div className="text-muted-foreground flex flex-row gap-x-4 text-sm">
           <h6>{formatDate(createdAt)}</h6>
 
-          <h6 className="list-item list-inside list-disc">{`${readTime} read`}</h6>
+          <h6 className="list-item list-inside list-disc">{readTime}</h6>
         </div>
       </section>
 
