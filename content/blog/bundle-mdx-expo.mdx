@@ -1,0 +1,172 @@
+---
+published: true
+category: Native
+date: 2025-09-25
+title: "Unlocking Local Content: How to Bundle Markdown Files in Your Expo App"
+summary: Bundle Markdown files in your Expo app with a custom Metro transformer. Convert .md content to strings at build time.
+tags:
+  - React Native
+  - Markdown
+  - Expo
+  - md
+  - metro.config.js
+  - metro bundler
+---
+
+Ever wanted to include rich text content like FAQs, Terms of Service, or even blog posts directly within your Expo app without fetching it from a server? Bundling local Markdown (`.md`) files is a fantastic way to do this. It ensures your content is always available offline and loads instantly.
+
+However, if you’ve ever tried `import myContent from './content.md';`, you know that Metro—the JavaScript bundler used by React Native—doesn't know what to do with it out of the box.
+
+In this guide, we’ll walk through how to teach Metro to handle `.md` files, turning them into usable strings within your Expo managed application.
+
+### The Magic: How It Works
+
+The core idea is to intercept files with a `.md` extension during the bundling process and transform them into a format that JavaScript understands. We want to take the raw text content of the Markdown file and export it as a simple string.
+
+This is where a custom **Babel transformer** comes in. A transformer is a script that Metro runs on each source file, allowing us to modify its content before it’s bundled.
+
+### Step 1: Create a Custom Metro Transformer
+
+First, create a new file in your project’s root directory named `metro.transformer.js`. This file will contain our custom logic.
+
+```js
+\// metro.transformer.js
+
+const upstreamTransformer = require("@expo/metro-config/babel-transformer");
+const svgTransformer = require("react-native-svg-transformer/expo");
+
+module.exports.transform = async function ({ src, filename, ...rest }) {
+  \// If it's a markdown file, export its content as a string
+  if (filename.endsWith(".md")) {
+    const code = `module.exports = ${JSON.stringify(src)};`;
+    \// Pass the new JavaScript code through Expo's default transformer
+    return upstreamTransformer.transform({ src: code, filename, ...rest });
+  }
+
+  \// Handle SVG files (optional, but a common use case)
+  if (filename.endsWith(".svg")) {
+    return svgTransformer.transform({ src, filename, ...rest });
+  }
+
+  \// For all other files, use the default behavior
+  return upstreamTransformer.transform({ src, filename, ...rest });
+};
+```
+
+#### Why is this necessary?
+
+- **Targeting `.md` files:** The `if (filename.endsWith(".md"))` block checks if the current file is a Markdown file.
+- **The Transformation:** The line ``const code = \`module.exports = \${JSON.stringify(src)};\`;`` is the key. It takes the raw source (`src`) of the `.md` file, wraps it in quotes using `JSON.stringify` to make it a valid JavaScript string, and creates a line of code that exports this string.
+- **The `upstreamTransformer`:** This is **critically important** for Expo managed apps. We don't want to _replace_ Expo's default Babel transformer; we just want to add a step before it. The `upstreamTransformer` is Expo's own transformer ([Learn more](https://docs.expo.dev/versions/latest/config/metro/#extending-the-babel-transformer)). By passing our generated code (`module.exports = "..."`) back into it, we ensure that all the standard Expo and React Native transformations still run, keeping our app's build process intact.
+
+#### Adding Other Transformers
+
+As you can see in the example, this pattern is extensible. You can easily chain transformers for different file types. We check for `.md`, then for `.svg`, and finally fall back to the default transformer for everything else (`.js`, `.tsx`, etc.). This creates a single, powerful, and organized transformer for all your custom needs.
+
+### Step 2: Configure Metro to Use Our Transformer
+
+Now that we’ve created the transformer, we need to tell Metro to use it. Open your `metro.config.js` (or `.ts`) file and make the following changes.
+
+```js
+\// metro.config.js
+
+const { getDefaultConfig } = require("expo/metro-config");
+const path = require("path");
+
+const defaultConfig = getDefaultConfig(__dirname);
+const { transformer, resolver } = defaultConfig;
+
+\// 1. Point to our custom transformer
+defaultConfig.transformer = {
+  ...transformer,
+  babelTransformerPath: require.resolve(
+    path.join(__dirname, "metro.transformer.js"),
+  ),
+};
+
+\// 2. Tell Metro to treat .md as a source file
+defaultConfig.resolver = {
+  ...resolver,
+  \// Ensure Metro doesn't try to handle .md as a static asset
+  assetExts: resolver.assetExts.filter((ext) => ext !== "md"),
+  \// Add .md to the list of source file extensions
+  sourceExts: [...resolver.sourceExts, "md"],
+};
+
+module.exports = defaultConfig;
+```
+
+#### What do these changes do?
+
+1. `babelTransformerPath`: This property tells Metro to use our `metro.transformer.js` file for all code transformations instead of its default one.
+2. `resolver.sourceExts`: We add `'md'` to this array. This tells Metro that when you see an `import` statement for a `.md` file, you should treat it as a source code module that can be transformed and bundled.
+3. `resolver.assetExts`: We explicitly filter out `'md'` from the asset extensions. This prevents Metro from treating it like an image or a font, which would result in it being copied as a static file rather than being processed by our transformer.
+
+### Step 3: Make TypeScript Happy (Optional)
+
+If you’re using TypeScript, it will complain that it doesn’t know what a `.md` module is. To fix this, create a declaration file (e.g., `declaration.d.ts`) in your project's root and add the following:
+
+```tsx
+\// declaration.d.ts
+
+declare module "*.md" {
+  const content: string;
+  export default content;
+}
+```
+
+This tells TypeScript that any module imported from a `.md` file will have a default export that is a `string`.
+
+### Step 4: Render Your Markdown!
+
+You’re all set! You can now import Markdown files directly into your components.
+
+```tsx
+import myAwesomeContent from "./assets/content/faq.md";
+
+console.log(myAwesomeContent); // This will log the entire content of faq.md as a string!
+```
+
+But how do you render this string as styled, rich text? You’ll need a Markdown rendering component. For this, I recommend using [**`@amilmohd155/react-native-markdown`**](https://www.npmjs.com/package/@amilmohd155/react-native-markdown)—a lightweight and performant package I created specifically for this purpose.
+
+After installing it (`npm install @amilmohd155/react-native-markdown`), using it is incredibly simple:
+
+```tsx
+import React from "react";
+import { SafeAreaView, ScrollView, StyleSheet } from "react-native";
+
+import termsOfService from "./assets/legal/terms.md";
+import Markdown from "@amilmohd155/react-native-markdown";
+
+const TermsScreen = () => {
+  return (
+    <SafeAreaView style={styles.container}>
+      <ScrollView contentContainerStyle={styles.content}>
+        <Markdown markdown={termsOfService} />
+      </ScrollView>
+    </SafeAreaView>
+  );
+};
+
+const styles = StyleSheet.create({
+  container: { flex: 1 },
+  content: { padding: 16 },
+});
+
+export default TermsScreen;
+```
+
+### A Note on Performance and Bundle Size ⏱️
+
+It’s important to understand how this technique affects your app’s performance.
+
+The good news is that **there is no runtime performance hit**. All the work of reading the `.md` file and converting it into a string happens during the **build process** on your development machine. When a user runs your app, the Markdown content is already embedded as a simple string in the JavaScript bundle, ready to be used. The app doesn't have to read any files from the disk.
+
+However, there are two trade-offs to consider:
+
+1. **Bundle Size:** Because the entire content of your Markdown files is injected directly into your app’s code, it will increase your final bundle size. A few kilobytes of text for a privacy policy won’t make a difference, but bundling dozens of very large files with images encoded in them could bloat your app’s download size.
+2. **Build Time:** Metro now has an extra step to perform for each `.md` file. While very fast for a reasonable number of files, adding hundreds of large Markdown documents could lead to slightly slower build times and development server startup.
+
+**The takeaway:** This method is **perfect** for static content like legal documents, FAQs, release notes, or short guides. For a full-fledged app with hundreds of frequently changing articles (like a blog), fetching content from a server on-demand is a more scalable solution.
+
+And that’s it! You now have a powerful, flexible system for bundling and displaying local content in your Expo app. Happy coding! 🚀
