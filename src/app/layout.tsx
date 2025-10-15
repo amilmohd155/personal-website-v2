@@ -31,7 +31,13 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={cn("antialiased", fontVariables)}>
+      <body
+        className={cn(
+          "antialiased",
+          fontVariables,
+          "flex min-h-screen flex-col justify-between",
+        )}
+      >
         <ThemeProvider
           attribute="class"
           defaultTheme="system"
