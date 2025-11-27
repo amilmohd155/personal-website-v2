@@ -127,16 +127,16 @@ import myAwesomeContent from "./assets/content/faq.md";
 console.log(myAwesomeContent); // This will log the entire content of faq.md as a string!
 ```
 
-But how do you render this string as styled, rich text? You’ll need a Markdown rendering component. For this, I recommend using [**`@amilmohd155/react-native-markdown`**](https://www.npmjs.com/package/@amilmohd155/react-native-markdown)—a lightweight and performant package I created specifically for this purpose.
+But how do you render this string as styled, rich text? You’ll need a Markdown rendering component. For this, I recommend using [**`@docren/react-native-markdown`**](https://www.npmjs.com/package/@docren/react-native-markdown)—a lightweight and performant package I created specifically for this purpose.
 
-After installing it (`npm install @amilmohd155/react-native-markdown`), using it is incredibly simple:
+After installing it (`npm install @docren/react-native-markdown`), using it is incredibly simple:
 
 ```tsx
 import React from "react";
 import { SafeAreaView, ScrollView, StyleSheet } from "react-native";
 
 import termsOfService from "./assets/legal/terms.md";
-import Markdown from "@amilmohd155/react-native-markdown";
+import Markdown from "@docren/react-native-markdown";
 
 const TermsScreen = () => {
   return (
