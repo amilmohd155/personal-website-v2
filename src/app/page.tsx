@@ -7,7 +7,7 @@ export default function Page() {
   const homepage = pages.find((page) => page.slug === "home");
 
   if (!homepage) {
-    return notFound;
+    notFound();
   }
 
   return (

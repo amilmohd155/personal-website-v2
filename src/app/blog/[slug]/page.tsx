@@ -7,12 +7,6 @@ import { blogs } from "@content";
 import { MDXContent } from "@/components/mdx-content";
 import TableOfContents from "@/components/table-of-contents";
 
-type Props = {
-  params: Promise<{
-    slug: string;
-  }>;
-};
-
 async function getBlogBySlug(slug: string) {
   try {
     const article = blogs.find((article) => article.slug === slug);
@@ -28,7 +22,9 @@ async function getBlogBySlug(slug: string) {
   }
 }
 
-export default async function ArticlePage({ params }: Props) {
+export default async function ArticlePage({
+  params,
+}: PageProps<"/blog/[slug]">) {
   const { slug } = await params;
 
   const { title, summary, category, date, readTime, body, toc } =
@@ -87,7 +83,9 @@ export async function generateStaticParams() {
   }));
 }
 
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
+export async function generateMetadata({
+  params,
+}: PageProps<"/blog/[slug]">): Promise<Metadata> {
   const { slug } = await params;
   const {
     summary: description,

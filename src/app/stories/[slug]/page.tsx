@@ -6,12 +6,6 @@ import { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 
-type Props = {
-  params: Promise<{
-    slug: string;
-  }>;
-};
-
 function getStoryBySlug(slug: string) {
   try {
     const story = stories.find((article) => article.slug === slug);
@@ -25,7 +19,9 @@ function getStoryBySlug(slug: string) {
   }
 }
 
-export default async function ArticlePage({ params }: Props) {
+export default async function ArticlePage({
+  params,
+}: PageProps<"/stories/[slug]">) {
   const { slug } = await params;
 
   const {
@@ -81,7 +77,9 @@ export async function generateStaticParams() {
   return stories.map((story) => ({ slug: story.slug }));
 }
 
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
+export async function generateMetadata({
+  params,
+}: PageProps<"/stories/[slug]">): Promise<Metadata> {
   const { slug } = await params;
   const { summary: description, title, date: createdAt } = getStoryBySlug(slug);
 
