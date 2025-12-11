@@ -5,12 +5,6 @@ import { Metadata } from "next";
 import Link from "next/link";
 import { Suspense } from "react";
 
-type Params = {
-  searchParams?: Promise<{
-    filter?: string;
-  }>;
-};
-
 export const metadata: Metadata = {
   title: "Projects",
 };
@@ -20,9 +14,12 @@ const categories = [
   ...new Set(projects.map((project) => project.category)),
 ];
 
-export default async function ProjectPage(props: Params) {
-  const searchParams = await props.searchParams;
-  const filter = searchParams?.filter || "All";
+export default async function ProjectPage({
+  searchParams,
+}: PageProps<"/projects">) {
+  let { filter = "All" } = await searchParams;
+
+  filter = Array.isArray(filter) ? filter[0] : filter;
 
   return (
     <Page>

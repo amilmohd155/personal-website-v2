@@ -6,7 +6,6 @@ import { SpeedInsights } from "@vercel/speed-insights/next";
 import { cn } from "@/lib/utils";
 import { fontVariables } from "@/lib/fonts";
 import { ThemeProvider } from "next-themes";
-import { unstable_ViewTransition as ViewTransistion } from "react";
 import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
 import { config } from "@/lib/config";
@@ -44,11 +43,11 @@ export default function RootLayout({
           enableSystem
           enableColorScheme
         >
-          <ViewTransistion>
+          <>
             <Header />
             {children}
             <Footer />
-          </ViewTransistion>
+          </>
 
           <Analytics />
           <SpeedInsights />

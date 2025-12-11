@@ -7,13 +7,6 @@ import { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 
-type Props = {
-  params: Promise<{
-    collection: string;
-    slug: string;
-  }>;
-};
-
 function getArticleBySlug(slug: string, collection: string) {
   try {
     const article = devlog.find(
@@ -33,13 +26,15 @@ function getArticleBySlug(slug: string, collection: string) {
   }
 }
 
-export default async function DevlogPage({ params }: Props) {
+export default async function DevlogPage({
+  params,
+}: PageProps<"/devlog/[collection]/[slug]">) {
   const { collection, slug } = await params;
 
   const {
     category,
     title,
-    summary,
+    summary,  
     date: createdAt,
     readTime,
     toc,
@@ -108,7 +103,7 @@ export async function generateStaticParams() {
 }
 
 export async function generateMetadata(
-  { params }: Props,
+  { params }: PageProps<"/devlog/[collection]/[slug]">,
   // parent: ResolvingMetadata,
 ): Promise<Metadata> {
   const { collection, slug } = await params;

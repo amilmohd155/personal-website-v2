@@ -5,22 +5,16 @@ import { devlog, devlogCollections } from "@content";
 import { Metadata } from "next";
 import Link from "next/link";
 
-type Props = {
-  params: Promise<{
-    collection: string;
-  }>;
-  searchParams?: Promise<{
-    filter?: string;
-  }>;
-};
-
 function getArticles(collection: string) {
   return devlog
     .filter((article) => article.collection === collection && article.published)
     .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 }
 
-export default async function CollectionPage({ params, searchParams }: Props) {
+export default async function CollectionPage({
+  params,
+  searchParams,
+}: PageProps<"/devlog/[collection]">) {
   const { collection } = await params;
   const _searchParams = await searchParams;
   const filter = _searchParams?.filter || "All";
@@ -78,7 +72,9 @@ export async function generateStaticParams() {
   }));
 }
 
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
+export async function generateMetadata({
+  params,
+}: PageProps<"/devlog/[collection]">): Promise<Metadata> {
   const { collection } = await params;
 
   return {

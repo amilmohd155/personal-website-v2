@@ -8,12 +8,6 @@ import { Github, Globe } from "lucide-react";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 
-type Params = {
-  params: Promise<{
-    slug: string;
-  }>;
-};
-
 function getContent(slug: string) {
   try {
     const project = projects.find((project) => project.slug === slug);
@@ -27,7 +21,9 @@ function getContent(slug: string) {
   }
 }
 
-export default async function ProjectPage({ params }: Params) {
+export default async function ProjectPage({
+  params,
+}: PageProps<"/projects/[slug]">) {
   const { slug } = await params;
 
   const {
@@ -102,7 +98,9 @@ export async function generateStaticParams() {
   return projects.map((project) => ({ slug: project.slug }));
 }
 
-export async function generateMetadata({ params }: Params) {
+export async function generateMetadata({
+  params,
+}: PageProps<"/projects/[slug]">) {
   const { slug } = await params;
 
   const { title, summary } = getContent(slug);
