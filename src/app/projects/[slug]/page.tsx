@@ -7,6 +7,7 @@ import { projects } from "@content";
 import { Github, Globe } from "lucide-react";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
+import { ArticleSkeleton } from "@/components/skeletons";
 
 function getContent(slug: string) {
   try {
@@ -21,9 +22,18 @@ function getContent(slug: string) {
   }
 }
 
-export default async function ProjectPage({
+export default function ProjectPage({ params }: PageProps<"/projects/[slug]">) {
+  // Await params inside Suspense so unlisted slugs get an instant shell.
+  return (
+    <Suspense fallback={<ArticleSkeleton />}>
+      <ProjectDetails params={params} />
+    </Suspense>
+  );
+}
+
+async function ProjectDetails({
   params,
-}: PageProps<"/projects/[slug]">) {
+}: Pick<PageProps<"/projects/[slug]">, "params">) {
   const { slug } = await params;
 
   const {

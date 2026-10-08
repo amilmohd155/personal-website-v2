@@ -3,6 +3,7 @@ import { formatDate } from "@/lib/utils";
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
+import { ArticleSkeleton } from "@/components/skeletons";
 import { blogs } from "@content";
 import { MDXContent } from "@/components/mdx-content";
 import TableOfContents from "@/components/table-of-contents";
@@ -22,9 +23,18 @@ async function getBlogBySlug(slug: string) {
   }
 }
 
-export default async function ArticlePage({
+export default function ArticlePage({ params }: PageProps<"/blog/[slug]">) {
+  // Await params inside Suspense so unlisted slugs get an instant shell.
+  return (
+    <Suspense fallback={<ArticleSkeleton />}>
+      <BlogArticle params={params} />
+    </Suspense>
+  );
+}
+
+async function BlogArticle({
   params,
-}: PageProps<"/blog/[slug]">) {
+}: Pick<PageProps<"/blog/[slug]">, "params">) {
   const { slug } = await params;
 
   const { title, summary, category, date, readTime, body, toc } =
