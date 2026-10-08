@@ -9,7 +9,7 @@ export const metadata: Metadata = {
 };
 
 export default async function ShortsPage() {
-  const sortedStories = stories.sort((a, b) => {
+  const sortedStories = [...stories].sort((a, b) => {
     return new Date(b.date).getTime() - new Date(a.date).getTime();
   });
 

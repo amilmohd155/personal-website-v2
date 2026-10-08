@@ -111,21 +111,14 @@ const sharedComponents = {
   Image,
 };
 
-type MDXComponent = React.ComponentType<{ components?: MDXComponents }>;
-
-// Compiled components keyed by their Velite code, so each MDX document is
-// evaluated once and keeps a stable component identity across renders.
-const mdxComponentCache = new Map<string, MDXComponent>();
-
-// parse the Velite generated MDX code into a React component function
-function getMDXComponent(code: string): MDXComponent {
-  let component = mdxComponentCache.get(code);
-  if (!component) {
-    const fn = new Function(code);
-    component = fn({ ...runtime }).default as MDXComponent;
-    mdxComponentCache.set(code, component);
-  }
-  return component;
+// Evaluate the Velite generated MDX code. Its default export is a plain
+// render function (no hooks), so it is called directly to produce elements
+// rather than being mounted as a component created during render.
+function evaluateMDX(code: string) {
+  const fn = new Function(code);
+  return fn({ ...runtime }).default as (props: {
+    components?: MDXComponents;
+  }) => React.ReactNode;
 }
 
 interface MDXProps {
@@ -135,8 +128,6 @@ interface MDXProps {
 
 // MDXContent component
 export const MDXContent = ({ code, components }: MDXProps) => {
-  const Component = getMDXComponent(code);
-  // Component identity is stable: getMDXComponent caches per code string.
-  // eslint-disable-next-line react-hooks/static-components
-  return <Component components={{ ...sharedComponents, ...components }} />;
+  const renderMDX = evaluateMDX(code);
+  return renderMDX({ components: { ...sharedComponents, ...components } });
 };
