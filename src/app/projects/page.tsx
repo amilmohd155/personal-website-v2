@@ -1,7 +1,9 @@
 import { CategoryFilter } from "@/components/category-filter";
+import { ListSkeleton } from "@/components/skeletons";
 import { Page } from "@/components/page";
 import { projects } from "@content";
 import { Metadata } from "next";
+import { cacheLife } from "next/cache";
 import Link from "next/link";
 import { Suspense } from "react";
 
@@ -9,45 +11,53 @@ export const metadata: Metadata = {
   title: "Projects",
 };
 
+const sortedProjects = [...projects].sort(
+  (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
+);
 const categories = [
   "All",
-  ...new Set(projects.map((project) => project.category)),
+  ...new Set(sortedProjects.map((project) => project.category)),
 ];
 
-export default async function ProjectPage({
-  searchParams,
-}: PageProps<"/projects">) {
-  let { filter = "All" } = await searchParams;
-
-  filter = Array.isArray(filter) ? filter[0] : filter;
-
+export default function ProjectPage({ searchParams }: PageProps<"/projects">) {
   return (
     <Page>
       <Page.Section>
         <Page.Heading>Projects</Page.Heading>
 
-        {/* Categories */}
-        <CategoryFilter categories={categories} />
-
-        {/* Filtered Articles */}
-        {/* // Todo Loading Skeleton */}
-        <Suspense fallback={<div>Loading...</div>}>
-          <ProjectListings filter={filter} />
+        {/* searchParams is request data, so only this part streams in */}
+        <Suspense fallback={<ListSkeleton />}>
+          <FilteredProjects searchParams={searchParams} />
         </Suspense>
       </Page.Section>
     </Page>
   );
 }
 
-const ProjectListings = async ({ filter }: { filter: string }) => {
-  const filteredProjects = projects
-    .sort((a, b) => {
-      return new Date(b.date).getTime() - new Date(a.date).getTime();
-    })
-    .filter((project) => {
-      if (filter === "All") return true;
-      return project.category === filter;
-    });
+async function FilteredProjects({
+  searchParams,
+}: Pick<PageProps<"/projects">, "searchParams">) {
+  const { filter = "All" } = await searchParams;
+
+  return (
+    <>
+      {/* Categories */}
+      <CategoryFilter categories={categories} />
+
+      {/* Filtered Projects */}
+      <ProjectListings filter={Array.isArray(filter) ? filter[0] : filter} />
+    </>
+  );
+}
+
+async function ProjectListings({ filter }: { filter: string }) {
+  "use cache";
+  cacheLife("max");
+
+  const filteredProjects = sortedProjects.filter((project) => {
+    if (filter === "All") return true;
+    return project.category === filter;
+  });
 
   return (
     <div className="max-w-4xl">
@@ -73,4 +83,4 @@ const ProjectListings = async ({ filter }: { filter: string }) => {
       ))}
     </div>
   );
-};
+}

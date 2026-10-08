@@ -1,7 +1,7 @@
 import { config } from "@/lib/config";
 import { stories } from "@content";
 import { ImageResponse } from "next/og";
-import { NextResponse } from "next/server";
+import { notFound } from "next/navigation";
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 
@@ -11,17 +11,19 @@ export const contentType = "image/png";
 export const alt = "Open Graph Image for Stories";
 
 type Props = {
-  params: { slug: string };
+  params: Promise<{ slug: string }>;
 };
 
-export default async function Image({ params: { slug } }: Props) {
+export default async function Image({ params }: Props) {
+  const { slug } = await params;
+
   const bgData = await readFile(join(process.cwd(), "public", "blurry.jpg"));
   const bgBase64 = Buffer.from(bgData).toString("base64");
   const bgImageSrc = `data:image/jpeg;base64,${bgBase64}`;
 
   const article = stories.find((story) => story.slug === slug);
 
-  if (!article) return NextResponse.error;
+  if (!article) notFound();
 
   return new ImageResponse(
     (

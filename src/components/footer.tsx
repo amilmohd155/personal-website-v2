@@ -1,3 +1,5 @@
+import { cacheLife } from "next/cache";
+
 import { config } from "@/lib/config";
 import { cn } from "@/lib/utils";
 import { LinkHandler } from "./link-handler";
@@ -9,7 +11,7 @@ export function Footer() {
         <div className="flex flex-col gap-2 text-xs tracking-widest uppercase sm:flex-row">
           <a href={config.license.url}>{config.license.name}</a>
           <span className="hidden sm:flex">
-            {new Date().getFullYear()} - Present © {config.author}
+            <CurrentYear /> - Present © {config.author}
           </span>
         </div>
         <nav className="flex gap-6 text-xs tracking-widest uppercase">
@@ -20,4 +22,12 @@ export function Footer() {
       </div>
     </footer>
   );
+}
+
+// Cached so the footer stays part of the prerendered static shell.
+async function CurrentYear() {
+  "use cache";
+  cacheLife("days");
+
+  return new Date().getFullYear();
 }

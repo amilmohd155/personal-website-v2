@@ -6,7 +6,7 @@ export const config = {
     "A digital space for building and storytelling — blending full-stack web and mobile development with original short stories. Featuring projects, technical insights, and narrative experiments crafted with code and creativity.",
   repository: "https://github.com/amilmohd155/personal-website-v2",
   resumeUrl:
-    "https://cufknazmgyuxwsd4.public.blob.vercel-storage.com/Amil_Resume-lBBdbIaVpcMXifgtXhKl5XOk1wl9QH.pdf",
+    "https://cufknazmgyuxwsd4.public.blob.vercel-storage.com/Amil_Muhammed_Hamza_2026_1.pdf",
   license: {
     name: "MIT",
     url: "https://opensource.org/license/mit/",

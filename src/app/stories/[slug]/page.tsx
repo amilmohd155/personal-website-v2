@@ -5,6 +5,7 @@ import { stories } from "@content";
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
+import { ArticleSkeleton } from "@/components/skeletons";
 
 function getStoryBySlug(slug: string) {
   try {
@@ -19,9 +20,16 @@ function getStoryBySlug(slug: string) {
   }
 }
 
-export default async function ArticlePage({
-  params,
-}: PageProps<"/stories/[slug]">) {
+export default function ArticlePage({ params }: PageProps<"/stories/[slug]">) {
+  // Await params inside Suspense so unlisted slugs get an instant shell.
+  return (
+    <Suspense fallback={<ArticleSkeleton />}>
+      <Story params={params} />
+    </Suspense>
+  );
+}
+
+async function Story({ params }: Pick<PageProps<"/stories/[slug]">, "params">) {
   const { slug } = await params;
 
   const {

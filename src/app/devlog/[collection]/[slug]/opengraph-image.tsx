@@ -1,7 +1,7 @@
 import { config } from "@/lib/config";
 import { devlog } from "@content";
 import { ImageResponse } from "next/og";
-import { NextResponse } from "next/server";
+import { notFound } from "next/navigation";
 
 export const size = { width: 1200, height: 630 };
 
@@ -11,16 +11,16 @@ export const alt = "Open Graph Image for Devlog Article";
 export default async function Image({
   params,
 }: {
-  params: { collection: string; slug: string };
+  params: Promise<{ collection: string; slug: string }>;
 }) {
-  const { collection, slug } = params;
+  const { collection, slug } = await params;
 
   const article = devlog.find(
     (item) => item.slug === slug && item.collection === collection,
   );
 
   if (!article) {
-    return NextResponse.error;
+    notFound();
   }
 
   return new ImageResponse(

@@ -1,3 +1,4 @@
+import type { MDXComponents } from "mdx/types";
 import Image, { ImageProps } from "next/image";
 import { ComponentPropsWithoutRef } from "react";
 import * as runtime from "react/jsx-runtime";
@@ -110,11 +111,15 @@ const sharedComponents = {
   Image,
 };
 
-// parse the Velite generated MDX code into a React component function
-const useMDXComponent = (code: string) => {
+// Evaluate the Velite generated MDX code. Its default export is a plain
+// render function (no hooks), so it is called directly to produce elements
+// rather than being mounted as a component created during render.
+function evaluateMDX(code: string) {
   const fn = new Function(code);
-  return fn({ ...runtime }).default;
-};
+  return fn({ ...runtime }).default as (props: {
+    components?: MDXComponents;
+  }) => React.ReactNode;
+}
 
 interface MDXProps {
   code: string;
@@ -123,6 +128,6 @@ interface MDXProps {
 
 // MDXContent component
 export const MDXContent = ({ code, components }: MDXProps) => {
-  const Component = useMDXComponent(code);
-  return <Component components={{ ...sharedComponents, ...components }} />;
+  const renderMDX = evaluateMDX(code);
+  return renderMDX({ components: { ...sharedComponents, ...components } });
 };

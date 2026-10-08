@@ -12,9 +12,9 @@ const nextConfig: NextConfig = {
   env: {
     NEXT_PUBLIC_BASE_URL: `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`,
   },
-  experimental: {
-    viewTransition: true,
-  },
+  cacheComponents: true,
+  reactCompiler: true,
+  partialPrefetching: true,
   images: {
     formats: ["image/webp"],
     dangerouslyAllowSVG: true,

@@ -6,6 +6,7 @@ import { devlog, devlogCollections } from "@content";
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
+import { ArticleSkeleton } from "@/components/skeletons";
 
 function getArticleBySlug(slug: string, collection: string) {
   try {
@@ -26,15 +27,26 @@ function getArticleBySlug(slug: string, collection: string) {
   }
 }
 
-export default async function DevlogPage({
+export default function DevlogPage({
   params,
 }: PageProps<"/devlog/[collection]/[slug]">) {
+  // Await params inside Suspense so unlisted slugs get an instant shell.
+  return (
+    <Suspense fallback={<ArticleSkeleton />}>
+      <DevlogArticle params={params} />
+    </Suspense>
+  );
+}
+
+async function DevlogArticle({
+  params,
+}: Pick<PageProps<"/devlog/[collection]/[slug]">, "params">) {
   const { collection, slug } = await params;
 
   const {
     category,
     title,
-    summary,  
+    summary,
     date: createdAt,
     readTime,
     toc,

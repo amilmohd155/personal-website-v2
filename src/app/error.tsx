@@ -4,6 +4,7 @@ import { Page } from "@/components/page";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, RefreshCw } from "lucide-react";
 import Link from "next/link";
+import { useEffect } from "react";
 
 type ErrorProps = {
   error: Error & { digest?: string };
@@ -11,7 +12,9 @@ type ErrorProps = {
 };
 
 export default function Error({ error, reset }: ErrorProps) {
-  console.error("Error:", error);
+  useEffect(() => {
+    console.error("Error:", error);
+  }, [error]);
 
   return (
     <Page>

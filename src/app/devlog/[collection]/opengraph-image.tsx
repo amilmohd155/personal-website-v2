@@ -9,9 +9,9 @@ export const alt = "Open Graph Image for Devlog Article";
 export default async function Image({
   params,
 }: {
-  params: { collection: string };
+  params: Promise<{ collection: string }>;
 }) {
-  const { collection } = params;
+  const { collection } = await params;
 
   return new ImageResponse(
     (
