@@ -13,6 +13,7 @@ const nextConfig: NextConfig = {
     NEXT_PUBLIC_BASE_URL: `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`,
   },
   cacheComponents: true,
+  reactCompiler: true,
   partialPrefetching: true,
   images: {
     formats: ["image/webp"],
