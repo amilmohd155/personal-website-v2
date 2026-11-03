@@ -2,7 +2,7 @@ import { Gallery } from "@/components/gallery";
 import { LinkHandler } from "@/components/link-handler";
 import { MDXContent } from "@/components/mdx-content";
 import { ArticleSkeleton } from "@/components/skeletons";
-import { AppStoreIcon, GooglePlayIcon } from "@/components/store-icons";
+import { AppStoreIcon, GooglePlayIcon } from "@/components/brand-icons";
 import { Button } from "@/components/ui/button";
 import { config } from "@/lib/config";
 import { apps } from "@content";

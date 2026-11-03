@@ -5,7 +5,8 @@ import { Button } from "@/components/ui/button";
 import { config } from "@/lib/config";
 import { formatDate } from "@/lib/utils";
 import { projects } from "@content";
-import { Github, Globe } from "lucide-react";
+import { GithubIcon } from "@/components/brand-icons";
+import { Globe } from "lucide-react";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { ArticleSkeleton } from "@/components/skeletons";
@@ -83,7 +84,7 @@ async function ProjectDetails({
           {repository && (
             <Button asChild variant="outline">
               <LinkHandler href={repository} className="not-prose">
-                <Github />
+                <GithubIcon />
                 Github
               </LinkHandler>
             </Button>

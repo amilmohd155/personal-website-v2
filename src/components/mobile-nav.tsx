@@ -13,7 +13,7 @@ import { useState } from "react";
 import { config } from "@/lib/config";
 import Link from "next/link";
 import { LinkHandler } from "./link-handler";
-import * as LucideReact from "lucide-react";
+import { GithubIcon } from "./brand-icons";
 import { ThemeToggle } from "./theme-toggle";
 
 const NavItems: { title: string; href: string }[] = [
@@ -97,7 +97,7 @@ export const MobileNav = () => {
                 className="text-muted-foreground px-0"
               >
                 <LinkHandler href={config.repository} title="Github">
-                  <LucideReact.Github strokeWidth={1.5} />
+                  <GithubIcon />
                   <span className="sr-only">Github</span>
                 </LinkHandler>
               </Button>

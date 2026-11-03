@@ -155,12 +155,27 @@ export function Gallery({ images }: { images: GalleryImage[] }) {
   );
 }
 
-// The site sets `scrollbar-gutter: stable` on everything, which would reserve
-// an empty strip inside these overflow-hidden buttons.
+// The button doesn't clip: its inner clip box does the cropping and rounding,
+// so the image can fly back out over the lightbox when it closes.
 const tileButton =
-  "group ring-border focus-visible:ring-ring relative block cursor-zoom-in overflow-hidden rounded-lg ring-1 outline-none [scrollbar-gutter:auto] focus-visible:ring-2";
+  "group ring-border focus-visible:ring-ring relative block cursor-zoom-in rounded-lg ring-1 outline-none focus-visible:ring-2";
 const tileImage =
   "transition-[transform,opacity] duration-300 group-hover:scale-[1.02] group-hover:opacity-90 group-active:scale-100";
+
+/**
+ * While a tile's image flies back from the lightbox, raise it above the
+ * lightbox backdrop (z-50) so the zoom-out is visible, then drop it back.
+ */
+function useLiftWhileFlying() {
+  const [flying, setFlying] = useState(false);
+  return {
+    zIndex: flying ? 60 : undefined,
+    handlers: {
+      onLayoutAnimationStart: () => setFlying(true),
+      onLayoutAnimationComplete: () => setFlying(false),
+    },
+  };
+}
 
 function Tile({
   image,
@@ -180,6 +195,7 @@ function Tile({
   className?: string;
 }) {
   const ids = zoomIds(zoomKey);
+  const lift = useLiftWhileFlying();
   const ratio = image.width / image.height;
   // Cover the cell while keeping the image's shape: as wide as the cell, or
   // wider when the cell is relatively taller. Portrait screenshots sit at the
@@ -205,9 +221,10 @@ function Tile({
     >
       <motion.div
         layoutId={ids.clip}
+        {...lift.handlers}
         transition={ZOOM}
-        style={{ borderRadius: 8 }}
-        className="absolute inset-0 overflow-hidden [scrollbar-gutter:auto]"
+        style={{ borderRadius: 8, zIndex: lift.zIndex }}
+        className="absolute inset-0 [scrollbar-gutter:auto] overflow-hidden"
       >
         <motion.div
           layoutId={ids.img}
@@ -234,7 +251,7 @@ function Tile({
       {more > 0 && (
         <span
           aria-hidden
-          className="absolute inset-0 flex items-center justify-center bg-black/55 text-lg font-medium text-white transition-colors group-hover:bg-black/45 sm:text-2xl"
+          className="absolute inset-0 flex items-center justify-center rounded-lg bg-black/55 text-lg font-medium text-white transition-colors group-hover:bg-black/45 sm:text-2xl"
         >
           +{more} more
         </span>
@@ -254,6 +271,7 @@ function SingleImage({
   onOpen: () => void;
 }) {
   const ids = zoomIds(zoomKey);
+  const lift = useLiftWhileFlying();
   const ratio = image.width / image.height;
 
   return (
@@ -271,9 +289,10 @@ function SingleImage({
       >
         <motion.div
           layoutId={ids.clip}
+          {...lift.handlers}
           transition={ZOOM}
-          style={{ borderRadius: 8 }}
-          className="absolute inset-0 overflow-hidden [scrollbar-gutter:auto]"
+          style={{ borderRadius: 8, zIndex: lift.zIndex }}
+          className="absolute inset-0 [scrollbar-gutter:auto] overflow-hidden"
         >
           <motion.div
             layoutId={ids.img}
@@ -373,7 +392,7 @@ function Lightbox({
                 }}
               >
                 {/* Not animated itself: fading it would fade the zooming image */}
-                <motion.div className="fixed inset-0 z-50 flex items-center justify-center overflow-hidden text-white outline-none [scrollbar-gutter:auto]">
+                <motion.div className="fixed inset-0 z-50 flex [scrollbar-gutter:auto] items-center justify-center overflow-hidden text-white outline-none">
                   <Dialog.Title className="sr-only">
                     {hasMany
                       ? `Image ${index + 1} of ${total}: ${current.alt}`
@@ -557,9 +576,13 @@ function SlideImage({
 
   return (
     <motion.div
+      // A new key when the zoom is handed off, so the layoutIds leave with
+      // fresh elements rather than ones holding a stale shared-layout snapshot.
+      // Motion 14 throws ("reading 'applyTransform'") on the stale case.
+      key={ids ? "zoom" : "plain"}
       layoutId={ids?.clip}
       transition={ZOOM}
-      className="relative overflow-hidden [scrollbar-gutter:auto]"
+      className="relative [scrollbar-gutter:auto] overflow-hidden"
       style={{
         borderRadius: 6,
         aspectRatio: `${image.width} / ${image.height}`,
