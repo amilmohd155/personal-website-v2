@@ -13,11 +13,13 @@ export const config = {
   },
   sections: [
     {
-      name: "Blog",
+      name: "Apps",
     },
-
     {
       name: "Projects",
+    },
+    {
+      name: "Blog",
     },
   ],
   githubUrl: "https://github.com/amilmohd155",

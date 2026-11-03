@@ -9,7 +9,7 @@
     "start": "next start",
     "typegen": "next typegen",
     "lint": "eslint .",
-    "velite": "velite build --clean",
+    "velite": "velite build --clean --strict",
     "velite:watch": "velite build --watch",
     "typecheck": "tsc --noEmit"
   },

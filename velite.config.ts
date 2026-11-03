@@ -109,6 +109,29 @@ const projects = defineCollection({
     }),
 });
 
+const apps = defineCollection({
+  name: "apps",
+  pattern: "apps/**/*.mdx",
+  schema: s
+    .object({
+      slug: s.path().transform((val) => val.split("/")[1]),
+      title: s.string(),
+      summary: s.string().max(120),
+      stage: s.enum(["live", "development"]),
+      order: s.number().default(100),
+      platforms: s.array(s.string()).default([]),
+      icon: s.image().optional(),
+      website: s.string().url().optional(),
+      appStore: s.string().url().optional(),
+      playStore: s.string().url().optional(),
+      body: s.mdx(),
+    })
+    .transform((data) => ({
+      ...data,
+      permalink: `/apps/${data.slug}`,
+    })),
+});
+
 const stories = defineCollection({
   name: "stories",
   pattern: "stories/**/*.mdx",
@@ -149,6 +172,7 @@ export default defineConfig({
     devlog,
     devlogCollections,
     projects,
+    apps,
     stories,
     pages,
   },

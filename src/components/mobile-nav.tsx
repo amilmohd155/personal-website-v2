@@ -18,12 +18,16 @@ import { ThemeToggle } from "./theme-toggle";
 
 const NavItems: { title: string; href: string }[] = [
   {
-    title: "Blog",
-    href: "/blog",
+    title: "Apps",
+    href: "/apps",
   },
   {
     title: "Projects",
     href: "/projects",
+  },
+  {
+    title: "Blog",
+    href: "/blog",
   },
   {
     title: "Devlog",
