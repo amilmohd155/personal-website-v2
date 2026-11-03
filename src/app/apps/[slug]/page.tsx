@@ -1,3 +1,4 @@
+import { Gallery } from "@/components/gallery";
 import { LinkHandler } from "@/components/link-handler";
 import { MDXContent } from "@/components/mdx-content";
 import { ArticleSkeleton } from "@/components/skeletons";
@@ -40,6 +41,7 @@ async function AppDetails({
     playStore,
     body,
     permalink,
+    gallery,
   } = getContent(slug);
 
   return (
@@ -127,6 +129,12 @@ async function AppDetails({
           </div>
         )}
       </section>
+
+      {gallery.length > 0 && (
+        <section className="not-prose mt-8">
+          <Gallery images={gallery} />
+        </section>
+      )}
 
       <Suspense fallback={<div>Loading Content...</div>}>
         <MDXContent code={body} />

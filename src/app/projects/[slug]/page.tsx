@@ -1,3 +1,4 @@
+import { Gallery } from "@/components/gallery";
 import { LinkHandler } from "@/components/link-handler";
 import { MDXContent } from "@/components/mdx-content";
 import { Button } from "@/components/ui/button";
@@ -44,6 +45,7 @@ async function ProjectDetails({
     repository,
     demo,
     body,
+    gallery,
   } = getContent(slug);
 
   return (
@@ -96,6 +98,12 @@ async function ProjectDetails({
           )}
         </div>
       </section>
+
+      {gallery.length > 0 && (
+        <section className="not-prose mt-8">
+          <Gallery images={gallery} />
+        </section>
+      )}
 
       <Suspense fallback={<div>Loading Content...</div>}>
         <MDXContent code={body} />
