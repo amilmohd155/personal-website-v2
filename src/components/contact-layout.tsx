@@ -1,4 +1,5 @@
-import { FileText, Linkedin, Mail, X } from "lucide-react";
+import { FileText, Mail, X } from "lucide-react";
+import { LinkedinIcon } from "./brand-icons";
 import { LinkHandler } from "./link-handler";
 import { Page } from "./page";
 import { Button } from "./ui/button";
@@ -36,7 +37,7 @@ export const LinkGroup = () => (
       </Button>
       <Button asChild variant="outline">
         <LinkHandler href={config.linkedInUrl} className="not-prose">
-          <Linkedin />
+          <LinkedinIcon />
           amil-muhammed
         </LinkHandler>
       </Button>

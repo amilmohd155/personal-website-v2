@@ -1,32 +1,34 @@
+import { GithubIcon } from "@/components/brand-icons";
+import { Mail, PenTool, ScrollText } from "lucide-react";
+import type { ComponentType, SVGProps } from "react";
 import { config } from "./config";
-import * as LucideReact from "lucide-react";
 
 type NavIconItem = {
   title: string;
   href: string;
-  icon: keyof typeof LucideReact;
+  icon: ComponentType<SVGProps<SVGSVGElement> & { strokeWidth?: number }>;
 };
 
 const navIconItems: NavIconItem[] = [
   {
     title: "Devlog",
     href: "/devlog",
-    icon: "ScrollText",
+    icon: ScrollText,
   },
   {
     title: "Stories",
     href: "/stories",
-    icon: "PenTool",
+    icon: PenTool,
   },
   {
     title: "Contact",
     href: "/contact",
-    icon: "Mail",
+    icon: Mail,
   },
   {
     title: "Github",
     href: config.repository,
-    icon: "Github",
+    icon: GithubIcon,
   },
 ];
 export { navIconItems };

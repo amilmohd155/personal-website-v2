@@ -1,0 +1,29 @@
+---
+title: "Stendo: Standup Notes for Devs"
+summary: "Turns your GitHub commits and PRs into a ready-to-send Slack standup. No typing, just review and post."
+stage: "development"
+order: 1
+platforms:
+    - Android
+    - iOS
+icon: "./icon.png"
+---
+
+Stendo drafts your standup from your GitHub activity. It reads your commits, pull requests and reviews from the Standup Window, filters out the noise, and writes a Draft you can edit and post to Slack. You don't have to remember what you did yesterday.
+
+It's a mobile app built with **Expo** and **React Native**, backed by **Supabase**.
+
+## Features
+
+- **Draft** – a standup generated from your GitHub Activity across the Standup Window, with Noise filtered out.
+- **Edit and post** – tweak the Draft, then send it to Slack.
+- **Workday schedule** – the Standup Window follows your Workday, so Monday's draft covers the weekend.
+- **GitHub App sign-in** – you connect through a GitHub App install flow, with no personal access tokens.
+
+## 🛠️ Tech Stack
+
+- **Expo + expo-router** – iOS and Android app with feature-based routing
+- **Supabase** – Postgres, auth and Deno edge functions, with generated database types
+- **Pure TypeScript core** – schedule, activity and draft logic in a dependency-free package, shared with the edge functions and built test-first
+- **Tailwind + shared UI package** – a common design system
+- **pnpm monorepo** – a single dependency catalog, with lint, typecheck and tests enforced by git hooks

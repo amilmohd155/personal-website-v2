@@ -1,8 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import * as LucideReact from "lucide-react";
-import { JSX } from "react";
 import { Button } from "./ui/button";
 import { ThemeToggle } from "./theme-toggle";
 import { LinkHandler } from "./link-handler";
@@ -45,7 +43,7 @@ export function Header() {
           </nav>
           <div className="hidden items-center md:flex">
             {navIconItems.map((item) => {
-              const Icon = LucideReact[item.icon] as JSX.ElementType;
+              const Icon = item.icon;
 
               const isActive =
                 pathName.split("/")[1] === item.href.split("/")[1];

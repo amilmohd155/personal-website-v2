@@ -1,0 +1,35 @@
+---
+title: "Quizcript: Coding Quiz Daily"
+summary: "Level up your coding knowledge with bite-size quizzes on TypeScript, React, Node and beyond."
+stage: "development"
+order: 2
+platforms:
+    - Android
+    - iOS
+icon: "./icon.png"
+---
+
+Quizcript is a quiz app for developers. Pick a topic like TypeScript or React, answer bite-size questions, and track your progress. It's good for daily practice and interview prep.
+
+It's built with **Expo** and **React Native**, backed by **Supabase**. An admin dashboard manages the question content.
+
+## Features
+
+- **Dev-focused quizzes** – questions on TypeScript, React and other development topics, organized by tag.
+- **Daily free reward** – watch an ad to claim a daily reward.
+- **Profile avatars** – seed-based DiceBear avatars to personalize your profile.
+- **Progress tracking** – scores, and history.
+- **Dashboard** – admin UI for question management and metrics.
+- **AI content pipeline** – questions are generated in batches with the Claude Batches API, then versioned and reviewed before they go live.
+
+## 🛠️ Tech Stack
+
+- **Expo + expo-router** – React Native app for iOS and Android
+- **Reanimated v4 + Worklets** – UI-thread animations
+- **Zustand + React Query + Drizzle** – client state, server cache and local storage
+- **rnui + Storybook** – in-house React Native component library
+- **Supabase (PostgreSQL)** – business logic in Postgres functions, with edge functions and cron jobs signed with HMAC
+- **Zod schemas (foundation)** – shared types derived from Postgres enums via type generation
+- **Next.js 15** – admin dashboard (shadcn/ui) and marketing site
+- **pnpm + Turborepo** – monorepo
+- **Infisical** – secrets management across dev, staging and prod

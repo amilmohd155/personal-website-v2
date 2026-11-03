@@ -1,10 +1,12 @@
+import { Gallery } from "@/components/gallery";
 import { LinkHandler } from "@/components/link-handler";
 import { MDXContent } from "@/components/mdx-content";
 import { Button } from "@/components/ui/button";
 import { config } from "@/lib/config";
 import { formatDate } from "@/lib/utils";
 import { projects } from "@content";
-import { Github, Globe } from "lucide-react";
+import { GithubIcon } from "@/components/brand-icons";
+import { Globe } from "lucide-react";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { ArticleSkeleton } from "@/components/skeletons";
@@ -44,6 +46,7 @@ async function ProjectDetails({
     repository,
     demo,
     body,
+    gallery,
   } = getContent(slug);
 
   return (
@@ -81,7 +84,7 @@ async function ProjectDetails({
           {repository && (
             <Button asChild variant="outline">
               <LinkHandler href={repository} className="not-prose">
-                <Github />
+                <GithubIcon />
                 Github
               </LinkHandler>
             </Button>
@@ -96,6 +99,12 @@ async function ProjectDetails({
           )}
         </div>
       </section>
+
+      {gallery.length > 0 && (
+        <section className="not-prose mt-8">
+          <Gallery images={gallery} />
+        </section>
+      )}
 
       <Suspense fallback={<div>Loading Content...</div>}>
         <MDXContent code={body} />

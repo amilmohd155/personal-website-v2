@@ -2,6 +2,9 @@ import rehypeAutolinkHeadings from "rehype-autolink-headings";
 import rehypeSlug from "rehype-slug";
 import { defineConfig, defineCollection, s } from "velite";
 import rehypePrettyCode from "rehype-pretty-code";
+import { readdir } from "node:fs/promises";
+import { basename, dirname, extname } from "node:path";
+import { processAsset } from "velite";
 
 const readTime = (raw: string) => {
   if (!raw) return "0 min read";
@@ -14,6 +17,61 @@ const slugify = (input: string) =>
     .toLowerCase()
     .replace(/\s+/g, "-")
     .replace(/[^a-z0-9-]/g, "");
+
+const IMAGE_EXTENSIONS = new Set([
+  ".png",
+  ".jpg",
+  ".jpeg",
+  ".webp",
+  ".avif",
+  ".gif",
+]);
+
+// "01-trace-mode.png" -> "Trace mode"
+const altFromFilename = (name: string) => {
+  const text = name
+    .replace(/^\d+[-_.\s]*/, "")
+    .replace(/[-_]+/g, " ")
+    .trim();
+  return text ? text.charAt(0).toUpperCase() + text.slice(1) : "Screenshot";
+};
+
+/**
+ * Discover an entry's gallery from its folder: every image except `icon.*` (an
+ * app icon, set in frontmatter), sorted by filename, so number files to order
+ * them (`01-home.webp`, `02-editor.webp`, ...). Only entries that have their
+ * own folder (`<name>/index.mdx`) get one; a lone `<name>.mdx` shares its
+ * folder with other entries.
+ */
+const discoverGallery = async (
+  mdxPath: string,
+  output: { name: string; base: string },
+) => {
+  if (basename(mdxPath) !== "index.mdx") return [];
+  const dir = dirname(mdxPath);
+  const files = (await readdir(dir))
+    .filter((file) => IMAGE_EXTENSIONS.has(extname(file).toLowerCase()))
+    .sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
+
+  const process = (file: string) =>
+    processAsset(`./${file}`, mdxPath, output.name, output.base, true);
+
+  const galleryFiles = files.filter(
+    (file) => basename(file, extname(file)) !== "icon",
+  );
+
+  return Promise.all(
+    galleryFiles.map(async (file) => ({
+      ...(await process(file)),
+      alt: altFromFilename(basename(file, extname(file))),
+    })),
+  );
+};
+
+type EntryMeta = {
+  path: string;
+  config: { output: { name: string; base: string } };
+};
 
 const blogs = defineCollection({
   name: "blogs",
@@ -99,14 +157,46 @@ const projects = defineCollection({
       demo: s.string().url().optional(),
       body: s.mdx(),
     })
-    .transform((data) => {
+    .transform(async (data, { meta }) => {
       const slug = slugify(data.title);
       return {
         ...data,
         slug,
         permalink: `/projects/${slug}`,
+        gallery: await discoverGallery(
+          (meta as EntryMeta).path,
+          (meta as EntryMeta).config.output,
+        ),
       };
     }),
+});
+
+const apps = defineCollection({
+  name: "apps",
+  pattern: "apps/**/*.mdx",
+  schema: s
+    .object({
+      slug: s.path().transform((val) => val.split("/")[1]),
+      title: s.string(),
+      summary: s.string().max(120),
+      stage: s.enum(["live", "development"]),
+      order: s.number().default(100),
+      platforms: s.array(s.string()).default([]),
+      icon: s.image().optional(),
+      website: s.string().url().optional(),
+      appStore: s.string().url().optional(),
+      playStore: s.string().url().optional(),
+      body: s.mdx(),
+    })
+    .transform(async (data, { meta }) => ({
+      ...data,
+      permalink: `/apps/${data.slug}`,
+      // Velite passes the source file and config here, as its own s.image() uses.
+      gallery: await discoverGallery(
+        (meta as EntryMeta).path,
+        (meta as EntryMeta).config.output,
+      ),
+    })),
 });
 
 const stories = defineCollection({
@@ -149,6 +239,7 @@ export default defineConfig({
     devlog,
     devlogCollections,
     projects,
+    apps,
     stories,
     pages,
   },
